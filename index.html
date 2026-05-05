@@ -43,7 +43,7 @@
   .cat-tab.active { background: #C62828; color: white; }
   .item-card { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
   .item-info { flex: 1; }
-  .item-num { font-size: 16px; font-weight: 900; color: #C62828; }
+  .item-num { font-size: 20px; font-weight: 900; color: #C62828; min-width: 36px; background: #FFF0F0; border-radius: 8px; padding: 2px 6px; text-align: center; display: inline-block; margin-bottom: 3px; }
   .item-name { font-size: 12px; color: #1a1a1a; line-height: 1.35; margin: 1px 0; }
   .item-meta { font-size: 10px; color: #aaa; }
   .item-price { font-size: 13px; font-weight: 800; color: #1a1a1a; white-space: nowrap; margin-right: 6px; }
@@ -66,8 +66,8 @@
   .kit-name { font-size: 14px; font-weight: 800; color: #1a1a1a; margin: 4px 0 2px; }
   .kit-qtd { font-size: 11px; color: #888; }
   .kit-price { font-size: 24px; font-weight: 900; color: #1a1a1a; }
-  .kit-items-list { font-size: 10px; color: #666; line-height: 1.7; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: 6px; }
-  .kit-items-list b { color: #C62828; }
+  .kit-items-list { font-size: 13px; color: #444; line-height: 1.9; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: 6px; }
+  .kit-items-list b { color: #C62828; font-size: 15px; }
   .pgto-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
   .pgto-btn { border: 2px solid #e0e0e0; border-radius: 10px; padding: 10px 6px; text-align: center; cursor: pointer; background: white; transition: all .2s; }
   .pgto-btn.selected { border-color: #C62828; background: #FFF5F5; }
@@ -330,7 +330,7 @@ function renderStep1Kit() {
       </div>
     </div>
     <div class="kit-items-list">
-      ${k.items.slice(0,6).map(id=>`<b>${id}</b> ${itemMap[id]?itemMap[id].name.split(',')[0]:''}`).join(' · ')}${k.items.length>6?` · +${k.items.length-6} mais`:''}
+      ${k.items.map(id=>`<div><b>${id}</b> ${itemMap[id]?itemMap[id].name:''}</div>`).join('')}
     </div>
   </div>`).join('');
 }
