@@ -457,6 +457,13 @@ function renderStep2() {
       </div>
     </div>
     <p style="font-size:10px;color:#aaa;margin-top:-4px;">* campos obrigatórios</p>
+    <div style="background:#FFF3CD;border:1.5px solid #F9A825;border-radius:12px;padding:14px 16px;margin-top:10px;display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-size:20px;flex-shrink:0;">🚚</span>
+      <div>
+        <p style="font-size:13px;font-weight:800;color:#856404;margin-bottom:3px;">Frete não incluído no total</p>
+        <p style="font-size:12px;color:#856404;line-height:1.5;">O valor do frete será calculado e enviado para sua confirmação antes de fecharmos o pedido. Você poderá aprovar ou cancelar.</p>
+      </div>
+    </div>
   </div>` : '';
 
   return `<p class="section-title">Seus dados</p>
@@ -499,6 +506,7 @@ function renderStep3() {
     📦 ${state.mode==='kit' ? 'Kit — '+state.kit.name : 'Avulso — '+totalQty()+' itens'}<br>
     💳 ${PGTOS.find(p=>p.id===state.payment)?.label}${state.payment==='pix'?' <span style="color:#2E7D32;">✓ 3% off</span>':''}<br>
     🚗 ${state.delivery==='delivery' ? 'Delivery — '+fullAddress() : 'Retirada no local'}
+    ${state.delivery==='delivery' ? '<div style="margin-top:8px;background:#FFF3CD;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;color:#856404;">🚚 Frete será calculado e confirmado com você antes de fechar o pedido</div>' : ''}
   </div>`;
 }
 
@@ -532,7 +540,11 @@ function renderStep4() {
     <div class="summ-row"><span class="summ-label">Subtotal</span><span class="summ-value">${fmt(sub)}</span></div>
     ${vd>0?`<div class="summ-row"><span class="summ-label">Desconto volume (${(vd*100).toFixed(0)}%)</span><span class="summ-discount">−${fmt(sub*vd)}</span></div>`:''}
     ${pix>0?`<div class="summ-row"><span class="summ-label">Desconto PIX (3%)</span><span class="summ-discount">−${fmt(pix)}</span></div>`:''}
-    <div class="summ-row total"><span>Total</span><span>${fmt(total)}</span></div>
+    <div class="summ-row total"><span>Total produtos</span><span>${fmt(total)}</span></div>
+    ${state.delivery==='delivery'?`<div class="summ-row" style="margin-top:6px;background:#FFF3CD;border-radius:8px;padding:8px 10px;">
+      <span style="font-size:12px;font-weight:700;color:#856404;">🚚 Frete</span>
+      <span style="font-size:12px;font-weight:800;color:#856404;">A confirmar</span>
+    </div>`:''}
   </div>
   <div class="summ-block" style="font-size:12px;color:#555;line-height:1.9;">
     <div><b style="color:#1a1a1a;">👤 Cliente:</b> ${state.nome} — ${state.telefone}</div>
@@ -569,7 +581,8 @@ function generateMsg() {
   m += `\n*Subtotal:* ${fmt(sub)}`;
   if (vd > 0) m += `\n*Desconto volume (${(vd*100).toFixed(0)}%):* −${fmt(sub*vd)}`;
   if (pix > 0) m += `\n*Desconto PIX (3%):* −${fmt(pix)}`;
-  m += `\n*TOTAL: ${fmt(total)}*`;
+  m += `\n*TOTAL PRODUTOS: ${fmt(total)}*`;
+  if(state.delivery==='delivery') m += `\n⚠️ *Frete:* A calcular e confirmar com o cliente`;
   if (state.obs) m += `\n\n📝 *Obs:* ${state.obs}`;
   m += '\n\nObrigado! 😊';
   return m;
