@@ -8,7 +8,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; background: #f5f5f5; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; }
-  #app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: white; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 30px rgba(0,0,0,.1); }
+  #app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: white; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,.1); }
   .hdr { background: #C62828; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
   .hdr-logo { color: white; font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
   .hdr-logo span { font-size: 11px; display: block; font-weight: 500; opacity: .85; letter-spacing: 0; }
@@ -27,6 +27,16 @@
   .mode-card .mc-icon { font-size: 28px; margin-bottom: 8px; }
   .mode-card .mc-title { font-size: 13px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
   .mode-card .mc-sub { font-size: 11px; color: #888; margin-top: 2px; }
+  .disc-info-title { font-size: 11px; font-weight: 800; color: #1a1a1a; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .disc-blocks { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 6px; }
+  .disc-block { background: white; border: 1.5px solid #FFCDD2; border-radius: 10px; padding: 8px 4px; text-align: center; }
+  .disc-block .db-qty { font-size: 9px; color: #888; margin-bottom: 3px; line-height: 1.3; }
+  .disc-block .db-pct { font-size: 18px; font-weight: 900; color: #C62828; line-height: 1; }
+  .disc-block .db-off { font-size: 9px; color: #C62828; font-weight: 700; }
+  .disc-block.pix-block { border-color: #C8E6C9; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; }
+  .disc-block.pix-block .db-pct { font-size: 22px; color: #2E7D32; }
+  .disc-block.pix-block .db-off { font-size: 11px; color: #2E7D32; }
+  .disc-note { font-size: 10px; color: #aaa; font-style: italic; margin-top: 6px; }
   .cat-scroll { display: flex; gap: 6px; overflow-x: auto; padding: 0 0 8px; margin-bottom: 12px; scrollbar-width: none; }
   .cat-scroll::-webkit-scrollbar { display: none; }
   .cat-tab { background: #f0f0f0; border: none; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; color: #555; white-space: nowrap; cursor: pointer; transition: all .2s; flex-shrink: 0; }
@@ -72,9 +82,10 @@
   .dlv-btn .dv-icon { font-size: 24px; margin-bottom: 4px; }
   .dlv-btn .dv-label { font-size: 13px; font-weight: 800; color: #1a1a1a; }
   .dlv-btn.selected .dv-label { color: #C62828; }
-  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-  .field label { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .05em; }
-  .field input, .field textarea { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 12px 14px; font-size: 14px; outline: none; font-family: inherit; resize: none; transition: border-color .2s; }
+  .addr-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .field label { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .05em; }
+  .field input, .field textarea { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 11px 12px; font-size: 14px; outline: none; font-family: inherit; resize: none; transition: border-color .2s; }
   .field input:focus, .field textarea:focus { border-color: #C62828; }
   .summ-block { background: #f9f9f9; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
   .summ-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 13px; }
@@ -91,7 +102,7 @@
   .summ-item-name { flex: 1; color: #333; line-height: 1.35; }
   .summ-item-price { color: #1a1a1a; font-weight: 700; white-space: nowrap; }
   .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: white; border-top: 1px solid #eee; padding: 10px 16px; display: flex; gap: 8px; z-index: 40; }
-  .btn { flex: 1; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all .2s; letter-spacing: .02em; }
+  .btn { flex: 1; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all .2s; }
   .btn:active { transform: scale(.97); }
   .btn-back { background: #f0f0f0; color: #555; }
   .btn-next { background: #C62828; color: white; }
@@ -122,10 +133,10 @@
   <div class="content" id="content-area"></div>
   <div class="bottom-bar" id="bottom-bar"></div>
 </div>
-
+ 
 <script>
 const WA = '5511991185018';
-
+ 
 const ITEMS = [
   {id:1,  cat:'carnes',    name:'Carne moída patinho, arroz, feijão e purê de abóbora',          price:16.99, info:'300g · 261Kcal'},
   {id:2,  cat:'carnes',    name:'Feijoada magra, arroz, farofa e couve refogada',                 price:16.99, info:'300g · 310Kcal'},
@@ -168,7 +179,7 @@ const ITEMS = [
   {id:61, cat:'sobremesas',name:'Pavê de Coco Sem Açúcar Sem Lactose',                            price:12.90, info:'120g'},
   {id:62, cat:'sobremesas',name:'Pavê Tradicional Light',                                         price:12.90, info:'120g'},
 ];
-
+ 
 const KITS = [
   {id:'k10a', badge:'Kit 10', name:'Conheça Nossos Sabores', qty:10, price:169.90, note:'Livre escolha',          items:[1,2,5,7,8,9,12,13,14,20]},
   {id:'k14',  badge:'Kit 14', name:'Kit Sabores',            qty:14, price:229.90, note:'2 de cada sabor',        items:[1,2,7,8,9,13,14,20,12,5]},
@@ -177,7 +188,7 @@ const KITS = [
   {id:'k30',  badge:'Kit 30', name:'Família',                qty:30, price:459.90, note:'2 de cada (15 sabores)', items:[1,2,3,5,6,7,8,9,11,12,13,14,15,26,27]},
   {id:'k40',  badge:'Kit 40', name:'Pacotão Família',        qty:40, price:599.90, note:'4 de cada (10 sabores)', items:[1,2,3,5,7,8,9,12,13,14], badgeCls:'gold'},
 ];
-
+ 
 const CATS = [
   {id:'carnes',    label:'🥩 Carnes'},
   {id:'frangos',   label:'🍗 Frangos'},
@@ -186,7 +197,7 @@ const CATS = [
   {id:'novidades', label:'🔥 Novidades'},
   {id:'sobremesas',label:'🍮 Sobremesas'},
 ];
-
+ 
 const PGTOS = [
   {id:'pix',    label:'PIX',    sub:'3% off'},
   {id:'debito', label:'Débito', sub:''},
@@ -197,55 +208,74 @@ const PGTOS = [
   {id:'sodexo', label:'Sodexo', sub:''},
   {id:'pluxee', label:'Pluxee', sub:''},
 ];
-
+ 
 const itemMap = {};
 ITEMS.forEach(i => itemMap[i.id] = i);
-
-let state = { step:0, mode:null, kit:null, cart:{}, cat:'carnes', payment:null, delivery:null, address:'', obs:'' };
-
+ 
+let state = {
+  step:0, mode:null, kit:null, cart:{}, cat:'carnes',
+  payment:null, delivery:null,
+  rua:'', numero:'', complemento:'', bairro:'', cep:'', cidade:'',
+  obs:''
+};
+ 
 const fmt = n => 'R$ ' + n.toFixed(2).replace('.', ',');
 const totalQty = () => Object.values(state.cart).reduce((a,b) => a+b, 0);
-
+ 
 function subtotal() {
   if (state.mode === 'kit' && state.kit) return state.kit.price;
   return Object.entries(state.cart).reduce((s,[id,q]) => {
     const it = itemMap[Number(id)]; return s + (it ? it.price * q : 0);
   }, 0);
 }
-
+ 
 function volDisc() {
   if (state.mode === 'kit') return 0;
   const q = totalQty();
   if (q >= 40) return .06; if (q >= 30) return .05;
   if (q >= 20) return .04; if (q >= 14) return .02; return 0;
 }
-
+ 
 function calcTotal() {
   const sub = subtotal(), vd = state.mode === 'kit' ? 0 : sub * volDisc();
   const after = sub - vd, pix = state.payment === 'pix' ? after * .03 : 0;
   return { sub, vd, after, pix, total: after - pix };
 }
-
+ 
+function fullAddress() {
+  let a = state.rua;
+  if (state.numero) a += ', ' + state.numero;
+  if (state.complemento) a += ' ' + state.complemento;
+  if (state.bairro) a += ' — ' + state.bairro;
+  if (state.cep) a += ' — CEP ' + state.cep;
+  if (state.cidade) a += ' — ' + state.cidade;
+  return a;
+}
+ 
 const addItem = id => { state.cart[id] = (state.cart[id] || 0) + 1; render(); };
 const removeItem = id => {
   if (!state.cart[id]) return;
   if (state.cart[id] > 1) state.cart[id]--; else delete state.cart[id];
   render();
 };
-
+ 
 function goStep(s) {
   if (s === 1 && !state.mode) return;
   state.step = s; render();
   document.getElementById('content-area').scrollTop = 0;
 }
-
+ 
 const canNext = () => {
   if (state.step === 0) return !!state.mode;
   if (state.step === 1) return state.mode === 'kit' ? !!state.kit : totalQty() > 0;
-  if (state.step === 2) return !!state.payment && !!state.delivery;
+  if (state.step === 2) {
+    if (!state.payment || !state.delivery) return false;
+    if (state.delivery === 'delivery' && (!state.rua || !state.numero || !state.bairro || !state.cep || !state.cidade)) return false;
+    return true;
+  }
   return true;
 };
-
+ 
 function renderSteps() {
   for (let i = 0; i < 5; i++) {
     const el = document.getElementById('sd' + i); if (!el) continue;
@@ -254,7 +284,7 @@ function renderSteps() {
     else if (i === state.step) el.classList.add('active');
   }
 }
-
+ 
 function renderStep0() {
   return `<p class="section-title">Olá! 👋</p>
   <p class="section-sub">Como você quer montar seu pedido?</p>
@@ -266,14 +296,24 @@ function renderStep0() {
       <div class="mc-icon">✏️</div><div class="mc-title">Montar meu Pedido</div><div class="mc-sub">Escolha item por item</div>
     </div>
   </div>
-  <div style="background:#f9f9f9;border-radius:10px;padding:12px 14px;font-size:11px;color:#888;line-height:1.8;">
-    🏷️ <b style="color:#1a1a1a;">Descontos por volume</b> (pedido avulso):<br>
-    14–19 itens = <b style="color:#C62828;">2% off</b> &nbsp;·&nbsp; 20–29 = <b style="color:#C62828;">4% off</b><br>
-    30–39 = <b style="color:#C62828;">5% off</b> &nbsp;·&nbsp; 40+ = <b style="color:#C62828;">6% off</b><br>
-    PIX acumula + <b style="color:#C62828;">3% off</b>
+  <div style="background:#f9f9f9;border-radius:12px;padding:12px 14px;">
+    <p class="disc-info-title">🏷️ Descontos por volume (pedido avulso)</p>
+    <div class="disc-blocks">
+      <div class="disc-block"><div class="db-qty">14–19<br>itens</div><div class="db-pct">2%</div><div class="db-off">off</div></div>
+      <div class="disc-block"><div class="db-qty">20–29<br>itens</div><div class="db-pct">4%</div><div class="db-off">off</div></div>
+      <div class="disc-block"><div class="db-qty">30–39<br>itens</div><div class="db-pct">5%</div><div class="db-off">off</div></div>
+      <div class="disc-block"><div class="db-qty">40+<br>itens</div><div class="db-pct">6%</div><div class="db-off">off</div></div>
+    </div>
+    <div class="disc-block pix-block" style="border-radius:10px;">
+      <div style="font-size:13px;font-weight:800;color:#2E7D32;">PIX</div>
+      <div style="font-size:11px;color:#555;">acumula mais</div>
+      <div class="db-pct" style="font-size:22px;color:#2E7D32;">3%</div>
+      <div class="db-off" style="font-size:11px;color:#2E7D32;">off adicional</div>
+    </div>
+    <p class="disc-note">* Desconto não se aplica aos kits</p>
   </div>`;
 }
-
+ 
 function renderStep1Kit() {
   return KITS.map(k => `
   <div class="kit-card${state.kit&&state.kit.id===k.id?' selected':''}" onclick="state.kit=KITS.find(x=>x.id==='${k.id}');render()">
@@ -294,23 +334,23 @@ function renderStep1Kit() {
     </div>
   </div>`).join('');
 }
-
+ 
 function renderStep1Avulso() {
   const q = totalQty(), vd = volDisc();
   let discBar = '';
   if (q === 0) discBar = `<div class="vol-info">💡 Adicione 14+ itens para ganhar desconto de volume</div>`;
   else if (vd > 0) {
     let prox = '';
-    if(q<20) prox=' — adicione '+(20-q)+' para 4% off';
-    else if(q<30) prox=' — adicione '+(30-q)+' para 5% off';
-    else if(q<40) prox=' — adicione '+(40-q)+' para 6% off';
+    if(q<20) prox=' — mais '+(20-q)+' para 4%';
+    else if(q<30) prox=' — mais '+(30-q)+' para 5%';
+    else if(q<40) prox=' — mais '+(40-q)+' para 6%';
     discBar = `<div class="disc-bar">✅ Desconto ${(vd*100).toFixed(0)}% ativado! (${q} itens)${prox}</div>`;
-  } else discBar = `<div class="vol-info">💡 Adicione mais ${14-q} iten${14-q>1?'s':''} para ativar desconto</div>`;
-
+  } else discBar = `<div class="vol-info">💡 Mais ${14-q} iten${14-q>1?'s':''} para ativar desconto</div>`;
+ 
   const catTabs = CATS.map(c =>
     `<button class="cat-tab${state.cat===c.id?' active':''}" onclick="state.cat='${c.id}';render()">${c.label}</button>`
   ).join('');
-
+ 
   const items = ITEMS.filter(i => i.cat === state.cat).map(it => {
     const qty = state.cart[it.id] || 0;
     const b = (it.isNew ? `<span class="item-badge badge-new">NOVO</span>` : '') +
@@ -328,29 +368,56 @@ function renderStep1Avulso() {
       </div>
     </div>`;
   }).join('');
-
+ 
   const cartBar = q > 0 ? `<div class="mini-cart">
     <div class="mc-left"><b>${q}</b> iten${q>1?'s':''} no carrinho</div>
     <div class="mc-right">${fmt(subtotal())}</div>
   </div>` : '';
-
+ 
   return discBar + `<div class="cat-scroll">${catTabs}</div>` + cartBar + items;
 }
-
+ 
 function renderStep2() {
   const pgtos = PGTOS.map(p => `
   <div class="pgto-btn${state.payment===p.id?' selected':''}" onclick="state.payment='${p.id}';render()">
     <div class="pg-label">${p.label}</div>
     ${p.sub ? `<div class="pg-sub">${p.sub}</div>` : ''}
   </div>`).join('');
-
-  const addr = state.delivery === 'delivery' ? `
-  <div class="field">
-    <label>Endereço de entrega</label>
-    <input type="text" placeholder="Rua, número, bairro, cidade..." value="${state.address.replace(/"/g,'&quot;')}"
-      oninput="state.address=this.value" />
+ 
+  const addrFields = state.delivery === 'delivery' ? `
+  <div style="background:#f9f9f9;border-radius:12px;padding:12px 14px;margin-top:4px;">
+    <p style="font-size:11px;font-weight:800;color:#C62828;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📍 Endereço de Entrega</p>
+    <div class="field">
+      <label>Rua / Avenida *</label>
+      <input type="text" placeholder="Ex: Rua das Flores" value="${state.rua.replace(/"/g,'&quot;')}" oninput="state.rua=this.value;renderBottom()">
+    </div>
+    <div class="addr-grid2">
+      <div class="field">
+        <label>Número *</label>
+        <input type="text" placeholder="Ex: 123" value="${state.numero.replace(/"/g,'&quot;')}" oninput="state.numero=this.value;renderBottom()">
+      </div>
+      <div class="field">
+        <label>Complemento</label>
+        <input type="text" placeholder="Apto, Bloco..." value="${state.complemento.replace(/"/g,'&quot;')}" oninput="state.complemento=this.value">
+      </div>
+    </div>
+    <div class="field">
+      <label>Bairro *</label>
+      <input type="text" placeholder="Ex: Centro" value="${state.bairro.replace(/"/g,'&quot;')}" oninput="state.bairro=this.value;renderBottom()">
+    </div>
+    <div class="addr-grid2">
+      <div class="field">
+        <label>CEP *</label>
+        <input type="text" placeholder="00000-000" maxlength="9" value="${state.cep.replace(/"/g,'&quot;')}" oninput="state.cep=this.value;renderBottom()">
+      </div>
+      <div class="field">
+        <label>Cidade *</label>
+        <input type="text" placeholder="Ex: São Paulo" value="${state.cidade.replace(/"/g,'&quot;')}" oninput="state.cidade=this.value;renderBottom()">
+      </div>
+    </div>
+    <p style="font-size:10px;color:#aaa;margin-top:-4px;">* campos obrigatórios</p>
   </div>` : '';
-
+ 
   return `<p class="section-title">Pagamento</p>
   <p class="section-sub">Como você vai pagar?</p>
   <div class="pgto-grid">${pgtos}</div>
@@ -365,29 +432,28 @@ function renderStep2() {
       <div class="dv-icon">🏪</div><div class="dv-label">Retirada</div>
       <div style="font-size:10px;color:#888;margin-top:2px;">Retire no local</div>
     </div>
-  </div>${addr}`;
+  </div>${addrFields}`;
 }
-
+ 
 function renderStep3() {
   return `<p class="section-title">Observações</p>
   <p class="section-sub">Alguma instrução especial?</p>
   <div class="field">
     <label>Observação (opcional)</label>
-    <textarea rows="5" placeholder="Ex: sem cebola no item 7, molho à parte, alergia a glúten..."
-      oninput="state.obs=this.value">${state.obs}</textarea>
+    <textarea rows="5" placeholder="Ex: sem cebola no item 7, molho à parte, alergia a glúten..." oninput="state.obs=this.value">${state.obs}</textarea>
   </div>
   <div style="background:#f9f9f9;border-radius:10px;padding:12px 14px;font-size:12px;color:#666;line-height:1.9;">
     <b style="color:#1a1a1a;">Resumo:</b><br>
     📦 ${state.mode==='kit' ? 'Kit — '+state.kit.name : 'Avulso — '+totalQty()+' itens'}<br>
     💳 ${PGTOS.find(p=>p.id===state.payment)?.label}${state.payment==='pix'?' <span style="color:#2E7D32;">✓ 3% off</span>':''}<br>
-    🚗 ${state.delivery==='delivery' ? 'Delivery' : 'Retirada'}
+    🚗 ${state.delivery==='delivery' ? 'Delivery — '+fullAddress() : 'Retirada no local'}
   </div>`;
 }
-
+ 
 function renderStep4() {
   const {sub,vd,after,pix,total} = calcTotal();
   const pgLabel = PGTOS.find(p=>p.id===state.payment)?.label || '';
-
+ 
   let itemsHtml = '';
   if (state.mode === 'kit' && state.kit) {
     itemsHtml = `<div class="summ-items"><div class="summ-item">
@@ -406,7 +472,7 @@ function renderStep4() {
     }).join('');
     itemsHtml = `<div class="summ-items">${rows}</div>`;
   }
-
+ 
   return `<p class="section-title">Resumo do Pedido</p>
   <p class="section-sub">Confira e envie pelo WhatsApp</p>
   ${itemsHtml}
@@ -418,17 +484,24 @@ function renderStep4() {
   </div>
   <div class="summ-block" style="font-size:12px;color:#555;line-height:1.9;">
     <div><b style="color:#1a1a1a;">💳 Pagamento:</b> ${pgLabel}${state.payment==='pix'?' — Chave CNPJ: 17.639.559/0001-69':''}</div>
-    <div><b style="color:#1a1a1a;">🚗 Entrega:</b> ${state.delivery==='delivery'?'Delivery'+(state.address?' — '+state.address:''):'Retirada no local'}</div>
+    <div><b style="color:#1a1a1a;">🚗 Entrega:</b> ${state.delivery==='delivery'?'Delivery — '+fullAddress():'Retirada no local'}</div>
     ${state.obs?`<div><b style="color:#1a1a1a;">📝 Obs:</b> ${state.obs}</div>`:''}
   </div>`;
 }
-
+ 
 function generateMsg() {
   const {sub,vd,after,pix,total} = calcTotal();
   let m = '🍱 *PEDIDO CDC FIT*\n\n';
   m += `📦 *Tipo:* ${state.mode==='kit'?'Kit':'Avulso'}\n`;
   m += `🚗 *Entrega:* ${state.delivery==='delivery'?'Delivery':'Retirada'}\n`;
-  if (state.delivery==='delivery' && state.address) m += `📍 *Endereço:* ${state.address}\n`;
+  if (state.delivery === 'delivery') {
+    m += `📍 *Endereço:*\n`;
+    m += `   Rua: ${state.rua}, ${state.numero}`;
+    if (state.complemento) m += ` ${state.complemento}`;
+    m += `\n   Bairro: ${state.bairro}\n`;
+    m += `   CEP: ${state.cep}\n`;
+    m += `   Cidade: ${state.cidade}\n`;
+  }
   m += `💳 *Pagamento:* ${PGTOS.find(p=>p.id===state.payment)?.label}${state.payment==='pix'?' (3% off)':''}\n\n*Itens:*\n`;
   if (state.mode==='kit' && state.kit) {
     m += `✅ ${state.kit.name} — ${state.kit.qty} refeições — ${fmt(state.kit.price)}\n`;
@@ -446,48 +519,42 @@ function generateMsg() {
   m += '\n\nObrigado! 😊';
   return m;
 }
-
+ 
 function sendWA() {
   window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(generateMsg()), '_blank');
 }
-
+ 
 function copyOrder() {
-  const msg = generateMsg();
-  const btn = document.getElementById('copy-btn');
+  const msg = generateMsg(), btn = document.getElementById('copy-btn');
   const done = () => { if(btn){btn.textContent='✓ Copiado!'; setTimeout(()=>{btn.textContent='📋 Copiar';},2000);} };
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(msg).then(done).catch(() => {
-      const ta=document.createElement('textarea');ta.value=msg;
-      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
-    });
-  } else {
-    const ta=document.createElement('textarea');ta.value=msg;
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
-  }
+  if (navigator.clipboard) navigator.clipboard.writeText(msg).then(done).catch(() => {
+    const ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+  });
+  else { const ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done(); }
 }
-
+ 
 function renderBottom() {
   const bar = document.getElementById('bottom-bar'); if (!bar) return;
   const ok = canNext();
   if (state.step===0) bar.innerHTML=`<button class="btn btn-next"${ok?'':' disabled'} onclick="goStep(1)">Continuar →</button>`;
-  else if (state.step===1) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(0)">← Voltar</button><button class="btn btn-next"${ok?'':' disabled'} onclick="goStep(2)">Próximo →</button>`;
-  else if (state.step===2) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(1)">← Voltar</button><button class="btn btn-next"${ok?'':' disabled'} onclick="goStep(3)">Próximo →</button>`;
-  else if (state.step===3) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(2)">← Voltar</button><button class="btn btn-next" onclick="goStep(4)">Ver Resumo →</button>`;
+  else if(state.step===1) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(0)">← Voltar</button><button class="btn btn-next"${ok?'':' disabled'} onclick="goStep(2)">Próximo →</button>`;
+  else if(state.step===2) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(1)">← Voltar</button><button class="btn btn-next"${ok?'':' disabled'} onclick="goStep(3)">Próximo →</button>`;
+  else if(state.step===3) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(2)">← Voltar</button><button class="btn btn-next" onclick="goStep(4)">Ver Resumo →</button>`;
   else bar.innerHTML=`<button class="btn btn-copy" id="copy-btn" onclick="copyOrder()">📋 Copiar</button><button class="btn btn-wa" onclick="sendWA()">🟢 WhatsApp</button>`;
 }
-
+ 
 function render() {
   const c = document.getElementById('content-area'); if (!c) return;
   renderSteps();
   document.getElementById('cart-count-hdr').textContent = totalQty();
   renderBottom();
   if (state.step===0) c.innerHTML = renderStep0();
-  else if (state.step===1) c.innerHTML = state.mode==='kit' ? renderStep1Kit() : renderStep1Avulso();
-  else if (state.step===2) c.innerHTML = renderStep2();
-  else if (state.step===3) c.innerHTML = renderStep3();
+  else if(state.step===1) c.innerHTML = state.mode==='kit' ? renderStep1Kit() : renderStep1Avulso();
+  else if(state.step===2) c.innerHTML = renderStep2();
+  else if(state.step===3) c.innerHTML = renderStep3();
   else c.innerHTML = renderStep4();
 }
-
+ 
 render();
 </script>
 </body>
