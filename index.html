@@ -681,48 +681,68 @@ function renderStep4() {
 }
 
 function generateMsg() {
-  const {sub,vd,after,pix,total} = calcTotal();
-  let m = '🍱 *PEDIDO CDC FIT*\n\n';
-  m += `👤 *Cliente:* ${state.nome}\n`;
-  m += `📱 *Telefone:* ${state.telefone}\n`;
-  m += `📦 *Tipo:* ${state.mode==='kit'?'Kit':'Avulso'}\n`;
-  m += `🚗 *Entrega:* ${state.delivery==='delivery'?'Delivery':'Retirada'}\n`;
-  if (state.delivery === 'delivery') {
-    m += `📍 *Endereço:*\n`;
-    m += `   Rua: ${state.rua}, ${state.numero}`;
-    if (state.complemento) m += ` ${state.complemento}`;
-    m += `\n   Bairro: ${state.bairro}\n`;
-    m += `   CEP: ${state.cep}\n`;
-    m += `   Cidade: ${state.cidade}\n`;
-  }
-  m += `💳 *Pagamento:* ${PGTOS.find(p=>p.id===state.payment)?.label}${state.payment==='pix'?' (3% off)':''}\n\n*Itens:*\n`;
-  if (state.mode==='kit' && state.kit) {
-    m += `✅ ${state.kit.name} — ${state.kit.qty} refeições — ${fmt(state.kit.price)}\n`;
-    if (Object.keys(state.cart).length > 0) {
-      m += `\n*Itens extras avulsos:*\n`;
+  try {
+    const {sub, kitPrice, avulso, vd, vdRate, after, pix, total} = calcTotal();
+    const pgLabel = PGTOS.find(p=>p.id===state.payment)?.label || '';
+    let m = '🍱 *PEDIDO CDC FIT*\n\n';
+    m += `👤 *Cliente:* ${state.nome}\n`;
+    m += `📱 *Telefone:* ${state.telefone}\n`;
+    m += `📦 *Tipo:* ${state.mode==='kit'?'Kit':'Avulso'}\n`;
+    m += `🚗 *Entrega:* ${state.delivery==='delivery'?'Delivery':'Retirada'}\n`;
+    if (state.delivery === 'delivery') {
+      m += `📍 *Endereço:*\n`;
+      m += `   Rua: ${state.rua}, ${state.numero}`;
+      if (state.complemento) m += ` ${state.complemento}`;
+      m += `\n   Bairro: ${state.bairro}\n`;
+      m += `   CEP: ${state.cep}\n`;
+      m += `   Cidade: ${state.cidade}\n`;
+    }
+    m += `💳 *Pagamento:* ${pgLabel}${state.payment==='pix'?' (3% off)':''}\n\n*Itens:*\n`;
+    if (state.mode==='kit' && state.kit) {
+      m += `✅ ${state.kit.name} — ${state.kit.qty} refeições — ${fmt(state.kit.price)}\n`;
+      if (Object.keys(state.cart).length > 0) {
+        m += `\n*Itens extras avulsos:*\n`;
+        Object.entries(state.cart).forEach(([id,q]) => {
+          const it = itemMap[Number(id)];
+          if (it) m += `• ${q>1?q+'x ':''}#${id} ${it.name} — ${fmt(it.price*q)}\n`;
+        });
+      }
+    } else {
       Object.entries(state.cart).forEach(([id,q]) => {
         const it = itemMap[Number(id)];
         if (it) m += `• ${q>1?q+'x ':''}#${id} ${it.name} — ${fmt(it.price*q)}\n`;
       });
     }
-  } else {
-    Object.entries(state.cart).forEach(([id,q]) => {
-      const it = itemMap[Number(id)];
-      if (it) m += `• ${q>1?q+'x ':''}#${id} ${it.name} — ${fmt(it.price*q)}\n`;
-    });
+    m += `\n*Subtotal:* ${fmt(sub)}`;
+    if (kitPrice > 0 && avulso > 0) {
+      m += ` (Kit: ${fmt(kitPrice)} + Extras: ${fmt(avulso)})`;
+    }
+    if (vdRate > 0) m += `\n*Desconto volume (${(vdRate*100).toFixed(0)}%):* −${fmt(vd)}`;
+    if (pix > 0) m += `\n*Desconto PIX (3%):* −${fmt(pix)}`;
+    m += `\n*TOTAL PRODUTOS: ${fmt(total)}*`;
+    if (state.delivery==='delivery') m += `\n⚠️ *Frete:* A calcular e confirmar com o cliente`;
+    if (state.obs) m += `\n\n📝 *Obs:* ${state.obs}`;
+    m += '\n\nObrigado! 😊';
+    return m;
+  } catch(e) {
+    console.error('generateMsg error:', e);
+    return '🍱 PEDIDO CDC FIT\nErro ao gerar mensagem. Por favor tente novamente.';
   }
-  m += `\n*Subtotal:* ${fmt(sub)}`;
-  if (vd > 0) m += `\n*Desconto volume (${(vd*100).toFixed(0)}%):* −${fmt(sub*vd)}`;
-  if (pix > 0) m += `\n*Desconto PIX (3%):* −${fmt(pix)}`;
-  m += `\n*TOTAL PRODUTOS: ${fmt(total)}*`;
-  if(state.delivery==='delivery') m += `\n⚠️ *Frete:* A calcular e confirmar com o cliente`;
-  if (state.obs) m += `\n\n📝 *Obs:* ${state.obs}`;
-  m += '\n\nObrigado! 😊';
-  return m;
 }
 
 function sendWA() {
-  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(generateMsg()), '_blank');
+  try {
+    const msg = generateMsg();
+    const url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      // Popup blocked — try location redirect
+      window.location.href = url;
+    }
+  } catch(e) {
+    alert('Erro ao abrir WhatsApp. Tente copiar o pedido e enviar manualmente.');
+    console.error(e);
+  }
 }
 
 function copyOrder() {
