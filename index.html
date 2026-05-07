@@ -424,32 +424,7 @@ function renderStep0() {
 }
 
 function renderStep1Kit() {
-  const extraCount = totalQty();
-  const extraBar = extraCount > 0 ? `<div class="mini-cart" style="margin-top:12px;">
-    <div class="mc-left"><b>${extraCount}</b> item${extraCount>1?'s':''} extra${extraCount>1?'s':''} adicionado${extraCount>1?'s':''}</div>
-    <div class="mc-right">${fmt(avulsoSubtotal())}</div>
-  </div>` : '';
-
-  const catTabs = CATS.map(c =>
-    `<button class="cat-tab${state.cat===c.id?' active':''}" onclick="state.cat='${c.id}';render()">${c.label}</button>`
-  ).join('');
-
-  const extraItems = state.kit ? `
-    <div style="margin-top:16px;">
-      <p style="font-size:13px;font-weight:800;color:#1a1a1a;margin-bottom:4px;">Quer adicionar mais itens? <span style="font-weight:400;color:#888;">(opcional)</span></p>
-      <p style="font-size:12px;color:#888;margin-bottom:10px;">Adicione marmitas avulsas além do kit</p>
-      ${extraBar}
-      <div class="cat-scroll">${catTabs}</div>
-      ${ITEMS.filter(i=>i.cat===state.cat).map(it=>{
-        const qty=state.cart[it.id]||0;
-        const b=(it.isNew?'<span class="item-badge badge-new">NOVO</span>':'')+(it.fit?'<span class="item-badge badge-fit">FIT</span>':'');
-        const photoSrc=ITEM_PHOTOS[it.id];
-        const photoHtml=photoSrc?'<img class="item-thumb" src="'+photoSrc+'" alt="">':'<div class="item-thumb"></div>';
-        return '<div class="item-card">'+photoHtml+'<div class="item-info"><div class="item-num">#'+it.id+'</div><div class="item-name">'+it.name+b+'</div><div class="item-meta">'+it.info+'</div></div><span class="item-price">'+fmt(it.price)+'</span><div class="qty-ctrl">'+(qty>0?'<button class="qty-btn minus" onclick="removeItem('+it.id+')">−</button><span class="qty-val">'+qty+'</span>':'')+'<button class="qty-btn plus" onclick="addItem('+it.id+')">+</button></div></div>';
-      }).join('')}
-    </div>` : '';
-
-  return KITS.map(k => `
+  const kitCards = KITS.map(k => `
   <div class="kit-card${state.kit&&state.kit.id===k.id?' selected':''}" onclick="state.kit=KITS.find(x=>x.id==='${k.id}');render()">
     <div class="kit-header">
       <div>
@@ -467,6 +442,49 @@ function renderStep1Kit() {
       ${k.items.map(id=>`<div><b>${id}</b> ${itemMap[id]?itemMap[id].name:''}</div>`).join('')}
     </div>
   </div>`).join('');
+
+  if (!state.kit) return kitCards;
+
+  // Kit selected — show extras section
+  const q = totalQty();
+  const cartBar = q > 0 ? `<div class="mini-cart">
+    <div class="mc-left"><b>${q}</b> item${q>1?'s':''} extra${q>1?'s':''}</div>
+    <div class="mc-right">${fmt(avulsoSubtotal())}</div>
+  </div>` : '';
+
+  const catTabs = CATS.map(c =>
+    `<button class="cat-tab${state.cat===c.id?' active':''}" onclick="setCat('${c.id}')">${c.label}</button>`
+  ).join('');
+
+  const items = ITEMS.filter(i => i.cat === state.cat).map(it => {
+    const qty = state.cart[it.id] || 0;
+    const b = (it.isNew ? `<span class="item-badge badge-new">NOVO</span>` : '') +
+              (it.fit  ? `<span class="item-badge badge-fit">FIT</span>`  : '');
+    const photoSrc = ITEM_PHOTOS[it.id];
+    const photoHtml = photoSrc ? `<img class="item-thumb" src="${photoSrc}" alt="">` : `<div class="item-thumb"></div>`;
+    return `<div class="item-card">
+      ${photoHtml}
+      <div class="item-info">
+        <div class="item-num">#${it.id}</div>
+        <div class="item-name">${it.name}${b}</div>
+        <div class="item-meta">${it.info}</div>
+      </div>
+      <span class="item-price">${fmt(it.price)}</span>
+      <div class="qty-ctrl">
+        ${qty > 0 ? `<button class="qty-btn minus" onclick="removeItem(${it.id})">−</button><span class="qty-val">${qty}</span>` : ''}
+        <button class="qty-btn plus" onclick="addItem(${it.id})">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return kitCards + `
+    <div style="margin-top:16px;border-top:2px dashed #f0f0f0;padding-top:16px;">
+      <p style="font-size:14px;font-weight:800;color:#1a1a1a;margin-bottom:2px;">Adicionar itens avulsos <span style="font-weight:400;color:#888;font-size:12px;">(opcional)</span></p>
+      <p style="font-size:12px;color:#888;margin-bottom:12px;">Adicione marmitas extras além do kit</p>
+      ${cartBar}
+      <div class="cat-scroll">${catTabs}</div>
+      ${items}
+    </div>`;
 }
 
 function renderStep1Avulso() {
@@ -725,6 +743,8 @@ function renderBottom() {
   else if(state.step===3) bar.innerHTML=`<button class="btn btn-back" onclick="goStep(2)">← Voltar</button><button class="btn btn-next" onclick="goStep(4)">Ver Resumo →</button>`;
   else bar.innerHTML=`<button class="btn btn-copy" id="copy-btn" onclick="copyOrder()">📋 Copiar</button><button class="btn btn-wa" onclick="sendWA()">🟢 WhatsApp</button>`;
 }
+
+function setCat(cat) { state.cat = cat; render(); }
 
 function render() {
   const c = document.getElementById('content-area'); if (!c) return;
