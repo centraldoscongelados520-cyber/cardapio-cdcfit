@@ -320,6 +320,10 @@ function resetProd(){
   document.getElementById('total-preview').textContent='0';
   document.getElementById('pb8').className='pb-btn';
   document.getElementById('pb9').className='pb-btn';
+  document.getElementById('btn-confirmar').style.display='';
+  document.getElementById('btn-corrigir').style.display='';
+  document.getElementById('btn-cancelar').style.display='';
+  document.getElementById('btn-wpp-lote').style.display='none';
   var opts='<option value="">Selecionar prato...</option>';
   PRODUTOS.forEach(function(p){ opts+='<option value="'+p.num+'">Nº '+p.num+' — '+p.curto+'</option>'; });
   document.getElementById('sel-todos').innerHTML=opts;
