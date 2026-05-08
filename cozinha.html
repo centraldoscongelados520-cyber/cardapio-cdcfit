@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#C62828">
+<title>CDC Fit — Produção do Dia</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; }
+ 
+  /* Desktop centering */
+  @media (min-width: 700px) {
+    body { display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; background: #8E0000; min-height: 100vh; }
+    #app { border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  }
+  @media (min-width: 900px) { body { align-items: center; } }
+ 
+  #app { max-width: 500px; width: 100%; min-height: 100vh; background: white; display: flex; flex-direction: column; }
+ 
+  /* Header */
+  .hdr { background: #C62828; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+  .hdr-title { color: white; font-size: 18px; font-weight: 800; }
+  .hdr-sub { color: rgba(255,255,255,.8); font-size: 12px; margin-top: 2px; }
+  .hdr-btn { background: rgba(255,255,255,.2); border: none; border-radius: 20px; padding: 6px 14px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .hdr-btn:active { background: rgba(255,255,255,.35); }
+ 
+  /* Mode selector */
+  .mode-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; gap: 16px; }
+  .mode-screen h2 { font-size: 22px; font-weight: 800; color: #1a1a1a; text-align: center; margin-bottom: 8px; }
+  .mode-btn { width: 100%; border: 2px solid #E0E0E0; border-radius: 16px; padding: 22px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; background: white; transition: all .2s; text-align: left; }
+  .mode-btn:active { transform: scale(.97); }
+  .mode-btn.red { border-color: #C62828; background: #FFF5F5; }
+  .mode-icon { font-size: 36px; flex-shrink: 0; }
+  .mode-text h3 { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 3px; }
+  .mode-text p { font-size: 13px; color: #888; line-height: 1.4; }
+ 
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; }
+ 
+  /* Manager — category + items */
+  .cat-label { font-size: 11px; font-weight: 800; color: #C62828; text-transform: uppercase; letter-spacing: .08em; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .cat-label::after { content: ''; flex: 1; height: 1px; background: #C62828; opacity: .2; }
+ 
+  .prod-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: .5px solid #f0f0f0; }
+  .prod-num { font-size: 18px; font-weight: 900; color: #C62828; min-width: 38px; background: #FFF0F0; border-radius: 8px; padding: 3px 6px; text-align: center; }
+  .prod-name { flex: 1; font-size: 13px; color: #1a1a1a; line-height: 1.35; }
+  .qty-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .qty-btn { width: 30px; height: 30px; border-radius: 50%; border: none; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .qty-btn.minus { background: #f0f0f0; color: #555; }
+  .qty-btn.plus { background: #C62828; color: white; }
+  .qty-btn:active { transform: scale(.88); }
+  .qty-val { font-size: 15px; font-weight: 800; min-width: 26px; text-align: center; color: #1a1a1a; }
+ 
+  /* Summary bar */
+  .summ-bar { background: #1a1a1a; border-radius: 12px; padding: 12px 16px; margin: 14px 0 10px; display: flex; align-items: center; justify-content: space-between; }
+  .summ-bar p { color: rgba(255,255,255,.75); font-size: 12px; }
+  .summ-bar b { color: white; font-size: 15px; }
+ 
+  /* Bottom bar */
+  .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: white; border-top: 1px solid #eee; padding: 10px 16px; z-index: 40; }
+  .btn-main { width: 100%; border: none; border-radius: 14px; padding: 16px; font-size: 15px; font-weight: 800; cursor: pointer; background: #C62828; color: white; transition: all .2s; }
+  .btn-main:active { transform: scale(.97); }
+  .btn-main:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-sec { width: 100%; border: 1.5px solid #C62828; border-radius: 14px; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer; background: white; color: #C62828; margin-top: 8px; transition: all .2s; }
+  .btn-sec:active { background: #FFF5F5; }
+ 
+  /* Kitchen view */
+  .progress-bar-wrap { background: #f0f0f0; border-radius: 99px; height: 8px; margin: 12px 0; overflow: hidden; }
+  .progress-bar-fill { background: #2E7D32; height: 100%; border-radius: 99px; transition: width .4s; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 12px; }
+  .progress-label b { color: #1a1a1a; }
+ 
+  .kitchen-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1.5px solid #f0f0f0; cursor: pointer; transition: opacity .2s; }
+  .kitchen-item.done { opacity: .45; }
+  .k-num { font-size: 22px; font-weight: 900; color: #C62828; min-width: 46px; background: #FFF0F0; border-radius: 10px; padding: 5px 8px; text-align: center; flex-shrink: 0; }
+  .kitchen-item.done .k-num { background: #E8F5E9; color: #2E7D32; }
+  .k-info { flex: 1; }
+  .k-name { font-size: 15px; font-weight: 700; color: #1a1a1a; line-height: 1.3; margin-bottom: 3px; }
+  .k-qty { font-size: 13px; color: #888; }
+  .k-qty b { color: #C62828; font-size: 16px; }
+  .kitchen-item.done .k-qty b { color: #2E7D32; }
+  .k-check { width: 36px; height: 36px; border-radius: 50%; border: 2.5px solid #E0E0E0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; transition: all .2s; }
+  .kitchen-item.done .k-check { background: #2E7D32; border-color: #2E7D32; color: white; }
+  .kitchen-item:active { background: #f9f9f9; border-radius: 8px; }
+ 
+  /* Empty state */
+  .empty { text-align: center; padding: 60px 24px; color: #aaa; }
+  .empty p { font-size: 16px; margin-top: 12px; }
+  .empty span { font-size: 48px; display: block; margin-bottom: 8px; }
+ 
+  /* Toast */
+  .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 700; z-index: 100; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div>
+      <p class="hdr-title" id="hdr-title">CDC Fit — Produção</p>
+      <p class="hdr-sub" id="hdr-sub"></p>
+    </div>
+    <button class="hdr-btn" id="hdr-btn" onclick="switchMode()" style="display:none"></button>
+  </div>
+  <div id="main-content"></div>
+</div>
+<div class="toast" id="toast"></div>
+ 
+<script>
+const TODAY = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+ 
+const ITEMS = [
+  {id:1,  cat:'Carnes',    name:'Carne moída patinho, arroz, feijão e purê de abóbora'},
+  {id:2,  cat:'Carnes',    name:'Feijoada magra, arroz, farofa e couve refogada'},
+  {id:3,  cat:'Carnes',    name:'Hambúrguer patinho grelhado, purê de batata e mussarela'},
+  {id:4,  cat:'Carnes',    name:'Kibe assado com legumes'},
+  {id:5,  cat:'Carnes',    name:'Escondidinho de carne moída e purê de batata'},
+  {id:6,  cat:'Carnes',    name:'Estrogonofe de carne, arroz e batata rústica'},
+  {id:7,  cat:'Carnes',    name:'Picadinho de carne, arroz, feijão, batata e cenoura'},
+  {id:8,  cat:'Carnes',    name:'Pernil acebolado, arroz, feijão e farofa caseira'},
+  {id:26, cat:'Carnes',    name:'Isca de patinho grelhada, arroz, feijão e brócolis'},
+  {id:41, cat:'Carnes',    name:'Escondidinho de carne com purê de abóbora'},
+  {id:42, cat:'Carnes',    name:'Hambúrguer grelhado com brócolis e molho de tomate'},
+  {id:9,  cat:'Frangos',   name:'Isca de frango, arroz, feijão e legumes refogados'},
+  {id:10, cat:'Frangos',   name:'Frango cremoso, molho de alho-poró e arroz'},
+  {id:11, cat:'Frangos',   name:'Escondidinho de frango e purê de batata'},
+  {id:12, cat:'Frangos',   name:'Filé de frango, arroz, feijão e creme de milho'},
+  {id:13, cat:'Frangos',   name:'Sobrecoxa assada, arroz, feijão e batata rústica'},
+  {id:14, cat:'Frangos',   name:'Estrogonofe de frango, arroz e batata rústica'},
+  {id:15, cat:'Frangos',   name:'Filé de frango à parmegiana e arroz'},
+  {id:27, cat:'Frangos',   name:'Frango desfiado, arroz e couve-flor gratinada'},
+  {id:40, cat:'Frangos',   name:'Frango desfiado com brócolis refogado'},
+  {id:43, cat:'Frangos',   name:'Frango ao molho de alho-poró e legumes refogados'},
+  {id:16, cat:'Massas',    name:'Lasanha tradicional molho pomodoro'},
+  {id:17, cat:'Massas',    name:'Panqueca de carne, molho de tomate e mussarela'},
+  {id:18, cat:'Massas',    name:'Panqueca de frango, molho branco e mussarela'},
+  {id:19, cat:'Massas',    name:'Panqueca de queijo com molho de tomate natural'},
+  {id:20, cat:'Massas',    name:'Nhoque de batata 80% à bolonhesa e queijo'},
+  {id:21, cat:'Massas',    name:'Fusili ao molho pesto, sour cream e tomate'},
+  {id:22, cat:'Massas',    name:'Lasanha de abobrinha, molho branco e queijo'},
+  {id:23, cat:'Massas',    name:'Ravioli de carne ao molho de tomate e parmesão'},
+  {id:25, cat:'Massas',    name:'Ravioli de queijo, molho de tomate e parmesão'},
+  {id:30, cat:'Caldos',    name:'Caldo de mandioquinha com carne seca'},
+  {id:31, cat:'Caldos',    name:'Caldo verde com calabresa e couve'},
+  {id:32, cat:'Caldos',    name:'Caldo de legumes com frango à base de abóbora'},
+  {id:28, cat:'Novidades', name:'Salmão, macarrão penne, brócolis e tomate'},
+  {id:29, cat:'Novidades', name:'Salmão desfiado com arroz e brócolis'},
+  {id:50, cat:'Novidades', name:'Yakissoba de Frango — Molho da Chefe'},
+  {id:51, cat:'Novidades', name:'Tilápia ao molho praiano, arroz com castanhas e batata'},
+  {id:60, cat:'Sobremesas',name:'Pavê de Chocolate Diet'},
+  {id:61, cat:'Sobremesas',name:'Pavê de Coco Sem Açúcar Sem Lactose'},
+  {id:62, cat:'Sobremesas',name:'Pavê Tradicional Light'},
+];
+ 
+const itemMap = {};
+ITEMS.forEach(i => itemMap[i.id] = i);
+ 
+let mode = 'select';
+let production = {};
+let checked = {};
+ 
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+ 
+function parseHash() {
+  const hash = location.hash.replace('#','');
+  if (!hash) return null;
+  const result = {};
+  try {
+    hash.split(',').forEach(part => {
+      const [id, qty] = part.split(':');
+      if (id && qty && Number(id) && Number(qty)) result[Number(id)] = Number(qty);
+    });
+    return Object.keys(result).length > 0 ? result : null;
+  } catch(e) { return null; }
+}
+ 
+function buildHash(prod) {
+  return Object.entries(prod)
+    .filter(([,q]) => q > 0)
+    .map(([id,q]) => `${id}:${q}`)
+    .join(',');
+}
+ 
+function switchMode() {
+  if (mode === 'kitchen') {
+    mode = 'manager';
+  } else {
+    const hash = buildHash(production);
+    if (!hash) return toast('Adicione itens primeiro!');
+    mode = 'kitchen';
+    location.hash = hash;
+    loadChecked();
+  }
+  render();
+}
+ 
+function loadChecked() {
+  try {
+    const saved = localStorage.getItem('cozinha-checked-' + buildHash(production));
+    checked = saved ? JSON.parse(saved) : {};
+  } catch(e) { checked = {}; }
+}
+ 
+function saveChecked() {
+  try {
+    localStorage.setItem('cozinha-checked-' + buildHash(production), JSON.stringify(checked));
+  } catch(e) {}
+}
+ 
+function toggleCheck(id) {
+  checked[id] = !checked[id];
+  saveChecked();
+  render();
+}
+ 
+function setQty(id, val) {
+  if (val <= 0) { delete production[id]; }
+  else { production[id] = val; }
+  render();
+}
+ 
+function copyLink() {
+  const hash = buildHash(production);
+  if (!hash) return toast('Adicione itens primeiro!');
+  const url = location.href.split('#')[0] + '#' + hash;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => toast('Link copiado! Envie para a cozinha.'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Link copiado! Envie para a cozinha.');
+  }
+}
+ 
+function sendWhatsApp() {
+  const hash = buildHash(production);
+  if (!hash) return toast('Adicione itens primeiro!');
+  const url = location.href.split('#')[0] + '#' + hash;
+  const items = Object.entries(production)
+    .filter(([,q]) => q > 0)
+    .map(([id,q]) => `• #${id} ${itemMap[Number(id)]?.name || ''} — ${q} un`)
+    .join('\n');
+  const msg = `🍳 *PRODUÇÃO DO DIA — CDC FIT*\n📅 ${TODAY}\n\n${items}\n\n📱 Acesse a lista: ${url}`;
+  window.open('https://wa.me/5511991185018?text=' + encodeURIComponent(msg), '_blank');
+}
+ 
+function render() {
+  const hdrTitle = document.getElementById('hdr-title');
+  const hdrSub = document.getElementById('hdr-sub');
+  const hdrBtn = document.getElementById('hdr-btn');
+  const content = document.getElementById('main-content');
+ 
+  if (mode === 'select') {
+    hdrTitle.textContent = 'CDC Fit — Produção';
+    hdrSub.textContent = TODAY;
+    hdrBtn.style.display = 'none';
+    content.innerHTML = renderSelect();
+    return;
+  }
+ 
+  if (mode === 'manager') {
+    hdrTitle.textContent = 'Lista de Produção';
+    hdrSub.textContent = TODAY;
+    hdrBtn.style.display = 'block';
+    hdrBtn.textContent = 'Modo Cozinha';
+    content.innerHTML = renderManager();
+    return;
+  }
+ 
+  if (mode === 'kitchen') {
+    const total = Object.keys(production).length;
+    const done = Object.values(checked).filter(Boolean).length;
+    hdrTitle.textContent = 'Cozinha';
+    hdrSub.textContent = `${done}/${total} pratos concluídos`;
+    hdrBtn.style.display = 'block';
+    hdrBtn.textContent = 'Editar Lista';
+    content.innerHTML = renderKitchen();
+    return;
+  }
+}
+ 
+function renderSelect() {
+  return `<div class="mode-screen">
+    <div>
+      <h2>Quem é você?</h2>
+      <p style="text-align:center;font-size:14px;color:#888;margin-top:-4px;">CDC Fit — Produção do Dia</p>
+    </div>
+    <button class="mode-btn red" onclick="mode='manager';render()">
+      <div class="mode-icon">📋</div>
+      <div class="mode-text">
+        <h3>Sou o Gestor</h3>
+        <p>Montar a lista de produção e enviar para a cozinha</p>
+      </div>
+    </button>
+    <button class="mode-btn" onclick="enterKitchen()">
+      <div class="mode-icon">👨‍🍳</div>
+      <div class="mode-text">
+        <h3>Sou a Cozinha</h3>
+        <p>Ver a lista do dia e marcar o que foi produzido</p>
+      </div>
+    </button>
+  </div>`;
+}
+ 
+function enterKitchen() {
+  const hash = parseHash();
+  if (hash) {
+    production = hash;
+    loadChecked();
+    mode = 'kitchen';
+    render();
+  } else {
+    toast('Peça o link ao gestor para acessar a lista do dia');
+  }
+}
+ 
+function renderManager() {
+  const cats = [...new Set(ITEMS.map(i => i.cat))];
+  const total = Object.values(production).reduce((a,b) => a+b, 0);
+  const count = Object.keys(production).filter(k => production[k] > 0).length;
+ 
+  const summBar = count > 0 ? `<div class="summ-bar">
+    <p><b>${count}</b> tipo${count>1?'s':''} · <b>${total}</b> unidades total</p>
+    <p style="font-size:11px;color:rgba(255,255,255,.6);">a produzir</p>
+  </div>` : '';
+ 
+  const itemsHtml = cats.map(cat => {
+    const catItems = ITEMS.filter(i => i.cat === cat);
+    const rows = catItems.map(it => {
+      const qty = production[it.id] || 0;
+      return `<div class="prod-item">
+        <span class="prod-num">${it.id}</span>
+        <span class="prod-name">${it.name}</span>
+        <div class="qty-ctrl">
+          ${qty > 0 ? `<button class="qty-btn minus" onclick="setQty(${it.id},${qty-1})">−</button>
+          <span class="qty-val">${qty}</span>` : ''}
+          <button class="qty-btn plus" onclick="setQty(${it.id},${qty+1})">+</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<p class="cat-label">${cat}</p>${rows}`;
+  }).join('');
+ 
+  return `<div class="content">${summBar}${itemsHtml}</div>
+  <div class="bottom-bar">
+    <button class="btn-main" onclick="sendWhatsApp()" ${count===0?'disabled':''}>🟢 Enviar para Cozinha (WhatsApp)</button>
+    <button class="btn-sec" onclick="copyLink()">🔗 Copiar Link</button>
+  </div>`;
+}
+ 
+function renderKitchen() {
+  const items = Object.entries(production)
+    .filter(([,q]) => q > 0)
+    .map(([id,q]) => ({ item: itemMap[Number(id)], qty: q, done: !!checked[Number(id)] }))
+    .filter(x => x.item)
+    .sort((a,b) => a.done - b.done);
+ 
+  const total = items.length;
+  const done = items.filter(x => x.done).length;
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+ 
+  if (total === 0) return `<div class="empty"><span>📋</span><p>Nenhuma lista de produção para hoje.<br>Aguarde o gestor enviar a lista.</p></div>`;
+ 
+  const rows = items.map(({item, qty, done}) => `
+    <div class="kitchen-item${done?' done':''}" onclick="toggleCheck(${item.id})">
+      <span class="k-num">${item.id}</span>
+      <div class="k-info">
+        <p class="k-name">${item.name}</p>
+        <p class="k-qty">Produzir: <b>${qty}</b> unidade${qty>1?'s':''}</p>
+      </div>
+      <div class="k-check">${done ? '✓' : ''}</div>
+    </div>`).join('');
+ 
+  const doneMsg = done === total ? `<div style="background:#E8F5E9;border-radius:10px;padding:12px 16px;text-align:center;margin-bottom:12px;">
+    <p style="font-size:15px;font-weight:800;color:#2E7D32;">🎉 Produção concluída!</p>
+  </div>` : '';
+ 
+  return `<div class="content">
+    ${doneMsg}
+    <div class="progress-label"><span>Progresso</span><b>${done}/${total} (${pct}%)</b></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    ${rows}
+  </div>`;
+}
+ 
+// Init
+const hashData = parseHash();
+if (hashData) {
+  production = hashData;
+  loadChecked();
+  mode = 'kitchen';
+} else {
+  mode = 'select';
+}
+render();
+</script>
+</body>
+</html>
