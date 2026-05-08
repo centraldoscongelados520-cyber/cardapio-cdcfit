@@ -24,6 +24,9 @@
   .hdr-sub { color: rgba(255,255,255,.8); font-size: 12px; margin-top: 2px; }
   .hdr-btn { background: rgba(255,255,255,.2); border: none; border-radius: 20px; padding: 6px 14px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
   .hdr-btn:active { background: rgba(255,255,255,.35); }
+  .back-btn { background: rgba(255,255,255,.15); border: none; border-radius: 20px; padding: 6px 12px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .back-btn:active { background: rgba(255,255,255,.3); }
+  .hdr-row { display: flex; align-items: center; gap: 10px; }
  
   /* Mode selector */
   .mode-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; gap: 16px; }
@@ -97,9 +100,12 @@
 <body>
 <div id="app">
   <div class="hdr">
-    <div>
-      <p class="hdr-title" id="hdr-title">CDC Fit — Produção</p>
-      <p class="hdr-sub" id="hdr-sub"></p>
+    <div style="display:flex;align-items:center;gap:10px;flex:1;">
+      <div id="back-wrap"></div>
+      <div>
+        <p class="hdr-title" id="hdr-title">CDC Fit — Produção</p>
+        <p class="hdr-sub" id="hdr-sub"></p>
+      </div>
     </div>
     <button class="hdr-btn" id="hdr-btn" onclick="switchMode()" style="display:none"></button>
   </div>
@@ -261,6 +267,7 @@ function render() {
     hdrTitle.textContent = 'CDC Fit — Produção';
     hdrSub.textContent = TODAY;
     hdrBtn.style.display = 'none';
+    document.getElementById('back-wrap').innerHTML = '';
     content.innerHTML = renderSelect();
     return;
   }
@@ -271,6 +278,8 @@ function render() {
     hdrBtn.style.display = 'block';
     hdrBtn.textContent = 'Modo Cozinha';
     content.innerHTML = renderManager();
+    document.getElementById('hdr-title').insertAdjacentHTML('beforebegin',
+      '<button class="back-btn" onclick="mode='select';location.hash='';render()">← Voltar</button>');
     return;
   }
  
@@ -282,6 +291,8 @@ function render() {
     hdrBtn.style.display = 'block';
     hdrBtn.textContent = 'Editar Lista';
     content.innerHTML = renderKitchen();
+    document.getElementById('hdr-title').insertAdjacentHTML('beforebegin',
+      '<button class="back-btn" onclick="mode='select';location.hash='';render()">← Voltar</button>');
     return;
   }
 }
