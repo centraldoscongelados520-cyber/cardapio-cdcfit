@@ -252,28 +252,18 @@ const ITEMS = [
   {id:13, cat:'frangos',   name:'Sobrecoxa assada, arroz, feijão e batata rústica',               price:16.99, info:'300g · 354Kcal'},
   {id:14, cat:'frangos',   name:'Estrogonofe de frango, arroz e batata rústica',                  price:16.99, info:'300g · 354Kcal'},
   {id:15, cat:'frangos',   name:'Filé de frango à parmegiana e arroz',                            price:17.49, info:'300g · 375Kcal'},
-  {id:27, cat:'frangos',   name:'Frango desfiado, arroz e couve-flor gratinada',                  price:16.99, info:'300g · 265Kcal'},
   {id:40, cat:'frangos',   name:'Frango desfiado com brócolis refogado',                          price:16.99, info:'300g · 215Kcal', fit:true},
-  {id:43, cat:'frangos',   name:'Frango ao molho de alho-poró e legumes refogados',               price:16.99, info:'300g · 225Kcal', fit:true},
   {id:16, cat:'massas',    name:'Lasanha tradicional molho pomodoro',                             price:18.99, info:'300g · 498Kcal'},
   {id:17, cat:'massas',    name:'Panqueca de carne, molho de tomate e mussarela',                 price:17.99, info:'300g · 366Kcal'},
   {id:18, cat:'massas',    name:'Panqueca de frango, molho branco e mussarela',                   price:17.99, info:'300g · 558Kcal'},
   {id:19, cat:'massas',    name:'Panqueca de queijo com molho de tomate natural',                 price:17.99, info:'300g · 406Kcal'},
   {id:20, cat:'massas',    name:'Nhoque de batata 80% à bolonhesa e queijo',                      price:17.90, info:'300g · 291Kcal'},
-  {id:21, cat:'massas',    name:'Fusili ao molho pesto, sour cream e tomate',                     price:17.99, info:'300g · 600Kcal'},
   {id:22, cat:'massas',    name:'Lasanha de abobrinha, molho branco e queijo',                    price:17.99, info:'300g · 250Kcal'},
   {id:23, cat:'massas',    name:'Ravioli de carne ao molho de tomate e parmesão',                 price:17.99, info:'402Kcal'},
-  {id:25, cat:'massas',    name:'Ravioli de queijo, molho de tomate e parmesão',                  price:17.99, info:'493Kcal'},
-  {id:30, cat:'caldos',    name:'Caldo de mandioquinha com carne seca',                           price:14.99, info:'400g · 375Kcal'},
-  {id:31, cat:'caldos',    name:'Caldo verde com calabresa e couve',                              price:14.99, info:'400g · 312Kcal'},
-  {id:32, cat:'caldos',    name:'Caldo de legumes com frango à base de abóbora',                  price:14.99, info:'400g · 230Kcal', fit:true},
   {id:28, cat:'novidades', name:'Salmão, macarrão penne, brócolis e tomate',                      price:22.90, info:'280g · 409Kcal', isNew:true},
   {id:29, cat:'novidades', name:'Salmão desfiado com arroz e brócolis',                           price:22.90, info:'300g · 385Kcal', isNew:true},
   {id:50, cat:'novidades', name:'Yakissoba de Frango — Molho da Chefe',                           price:19.99, info:'300g · 420Kcal', isNew:true},
   {id:51, cat:'novidades', name:'Tilápia ao molho praiano, arroz com castanhas e batata',         price:20.90, info:'300g · 350Kcal', isNew:true},
-  {id:60, cat:'sobremesas',name:'Pavê de Chocolate Diet',                                         price:12.90, info:'120g'},
-  {id:61, cat:'sobremesas',name:'Pavê de Coco Sem Açúcar Sem Lactose',                            price:12.90, info:'120g'},
-  {id:62, cat:'sobremesas',name:'Pavê Tradicional Light',                                         price:12.90, info:'120g'},
 ];
 
 const KITS = [
@@ -281,7 +271,7 @@ const KITS = [
   {id:'k14',  badge:'Kit 14', name:'Kit Sabores',            qty:14, price:229.90, note:'2 de cada sabor',        items:[1,2,7,8,9,13,14,20,12,5]},
   {id:'k10b', badge:'Kit 10', name:'Vida Leve Saborosa',     qty:10, price:169.00, note:'2 de cada (5 sabores)',  items:[1,7,9,10,14], badgeCls:'green'},
   {id:'k20',  badge:'Kit 20', name:'Dupla de Sabores',       qty:20, price:319.90, note:'2 de cada (10 sabores)', items:[1,2,3,5,7,8,9,11,13,14]},
-  {id:'k30',  badge:'Kit 30', name:'Família',                qty:30, price:459.90, note:'2 de cada (15 sabores)', items:[1,2,3,5,6,7,8,9,11,12,13,14,15,26,27]},
+  {id:'k30',  badge:'Kit 30', name:'Família',                qty:30, price:459.90, note:'2 de cada (15 sabores)', items:[1,2,3,5,6,7,8,9,11,12,13,14,15,26,10]},
   {id:'k40',  badge:'Kit 40', name:'Pacotão Família',        qty:40, price:599.90, note:'4 de cada (10 sabores)', items:[1,2,3,5,7,8,9,12,13,14], badgeCls:'gold'},
 ];
 
@@ -289,9 +279,7 @@ const CATS = [
   {id:'carnes',    label:'🥩 Carnes'},
   {id:'frangos',   label:'🍗 Frangos'},
   {id:'massas',    label:'🍝 Massas'},
-  {id:'caldos',    label:'🍲 Caldos'},
   {id:'novidades', label:'🔥 Novidades'},
-  {id:'sobremesas',label:'🍮 Sobremesas'},
 ];
 
 const PGTOS = [
