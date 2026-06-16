@@ -790,5 +790,70 @@ function render() {
 
 render();
 </script>
+ <!-- ===== ADD-ON CDC Fit: Período + Data de entrega ===== -->
+<script>
+(function () {
+  var periodo = '', dataStr = '';
+  function hoje(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function fmtBR(iso){if(!iso)return '';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+
+  function criarBloco(){
+    var box=document.createElement('div');
+    box.id='cdc-entrega-box';
+    box.innerHTML=''
+      +'<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Período de entrega</label>'
+      +'<div style="display:flex;gap:8px;"><button type="button" id="cdc-manha" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Manhã</button>'
+      +'<button type="button" id="cdc-tarde" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Tarde</button></div></div>'
+      +'<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Data de entrega</label>'
+      +'<input id="cdc-data" type="date" min="'+hoje()+'" style="width:100%;padding:12px;border:2px solid #c0392b;border-radius:10px;font-size:16px;color:#333;box-sizing:border-box;"></div>';
+    var bm=box.querySelector('#cdc-manha'),bt=box.querySelector('#cdc-tarde');
+    function sel(on,off){on.style.background='#c0392b';on.style.color='#fff';off.style.background='#fff';off.style.color='#c0392b';}
+    bm.onclick=function(){periodo='Manhã';sel(bm,bt);};
+    bt.onclick=function(){periodo='Tarde';sel(bt,bm);};
+    box.querySelector('#cdc-data').onchange=function(e){dataStr=e.target.value;};
+    return box;
+  }
+
+  function acharBotao(){
+    var els=document.querySelectorAll('button,a');
+    for(var i=0;i<els.length;i++){
+      var t=(els[i].textContent||'').toLowerCase();
+      if((t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)&&els[i].offsetParent!==null)return els[i];
+    }
+    return null;
+  }
+  setInterval(function(){
+    var btn=acharBotao(),box=document.getElementById('cdc-entrega-box');
+    if(btn){ if(!box)box=criarBloco(); if(box.previousSibling!==btn&&btn.parentNode)btn.parentNode.insertBefore(box,btn);}
+    else if(box&&box.parentNode){box.parentNode.removeChild(box);periodo='';dataStr='';}
+  },400);
+
+  document.addEventListener('click',function(e){
+    var el=e.target;
+    while(el&&el!==document){
+      var t=(el.textContent||'').toLowerCase();
+      if((el.tagName==='BUTTON'||el.tagName==='A')&&(t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)){
+        if(!periodo||!dataStr){e.preventDefault();e.stopPropagation();alert('Escolha o período (Manhã/Tarde) e a data de entrega antes de enviar.');return;}
+      }
+      el=el.parentNode;
+    }
+  },true);
+
+  function add(url){
+    if(!url||(!periodo&&!dataStr))return url;
+    if(url.indexOf('wa.me')===-1&&url.indexOf('whatsapp')===-1)return url;
+    if(url.indexOf('Per%C3%ADodo%20de%20entrega')>-1)return url;
+    var extra='\n\n*Período de entrega:* '+periodo+'\n*Data de entrega:* '+fmtBR(dataStr);
+    if(url.indexOf('text=')>-1)return url.replace(/text=([^&]*)/,function(m,g){return 'text='+g+encodeURIComponent(extra);});
+    return url+(url.indexOf('?')>-1?'&':'?')+'text='+encodeURIComponent(extra.trim());
+  }
+  var _open=window.open;
+  window.open=function(u){try{u=add(u);}catch(e){}return _open.apply(window,[u].concat([].slice.call(arguments,1)));};
+  document.addEventListener('click',function(e){
+    var a=e.target.closest?e.target.closest('a[href*="wa.me"],a[href*="whatsapp"]'):null;
+    if(a){try{a.setAttribute('href',add(a.getAttribute('href')));}catch(err){}}
+  },true);
+})();
+</script>
 </body>
 </html>
