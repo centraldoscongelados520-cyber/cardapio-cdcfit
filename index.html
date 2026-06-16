@@ -790,70 +790,75 @@ function render() {
 
 render();
 </script>
- <!-- ===== ADD-ON CDC Fit: Período + Data de entrega ===== -->
+ <!-- ===== ADD-ON CDC Fit v2: Período + Calendário + CEP opcional ===== -->
 <script>
 (function () {
-  var periodo = '', dataStr = '';
-  function hoje(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  var periodo='', dataStr='', calOpen=false, calView=new Date(), box=null;
+  var meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
   function fmtBR(iso){if(!iso)return '';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 
-  function criarBloco(){
-    var box=document.createElement('div');
-    box.id='cdc-entrega-box';
-    box.innerHTML=''
-      +'<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Período de entrega</label>'
-      +'<div style="display:flex;gap:8px;"><button type="button" id="cdc-manha" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Manhã</button>'
-      +'<button type="button" id="cdc-tarde" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Tarde</button></div></div>'
-      +'<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Data de entrega</label>'
-      +'<input id="cdc-data" type="date" min="'+hoje()+'" style="width:100%;padding:12px;border:2px solid #c0392b;border-radius:10px;font-size:16px;color:#333;box-sizing:border-box;"></div>';
-    var bm=box.querySelector('#cdc-manha'),bt=box.querySelector('#cdc-tarde');
-    function sel(on,off){on.style.background='#c0392b';on.style.color='#fff';off.style.background='#fff';off.style.color='#c0392b';}
-    bm.onclick=function(){periodo='Manhã';sel(bm,bt);};
-    bt.onclick=function(){periodo='Tarde';sel(bt,bm);};
-    box.querySelector('#cdc-data').onchange=function(e){dataStr=e.target.value;};
-    return box;
+  function render(){
+    if(!box)return;
+    var h='';
+    h+='<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Período de entrega</label><div style="display:flex;gap:8px;">';
+    ['Manhã','Tarde'].forEach(function(p){var on=periodo===p;h+='<button type="button" data-per="'+p+'" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;font-weight:700;cursor:pointer;'+(on?'background:#c0392b;color:#fff;':'background:#fff;color:#c0392b;')+'">'+p+'</button>';});
+    h+='</div></div>';
+    h+='<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Data de entrega</label>';
+    if(dataStr&&!calOpen){h+='<div style="display:flex;gap:8px;"><div style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;font-weight:700;color:#c0392b;">'+fmtBR(dataStr)+'</div><button type="button" data-cal-open="1" style="padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Alterar</button></div>';}
+    else if(!calOpen){h+='<button type="button" data-cal-open="1" style="width:100%;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">📅 Escolher data</button>';}
+    if(calOpen){
+      var today=sod(new Date()),y=calView.getFullYear(),m=calView.getMonth(),sd=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
+      h+='<div style="border:2px solid #c0392b;border-radius:12px;padding:10px;background:#fff;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><button type="button" data-nav="-1" style="width:36px;height:36px;border:1px solid #c0392b;border-radius:8px;background:#fff;color:#c0392b;font-size:18px;font-weight:700;cursor:pointer;">‹</button><strong style="color:#7a1f1f;">'+meses[m]+' '+y+'</strong><button type="button" data-nav="1" style="width:36px;height:36px;border:1px solid #c0392b;border-radius:8px;background:#fff;color:#c0392b;font-size:18px;font-weight:700;cursor:pointer;">›</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:11px;color:#999;margin-bottom:4px;">';
+      dows.forEach(function(d){h+='<div>'+d+'</div>';});
+      h+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
+      for(var i=0;i<sd;i++)h+='<div></div>';
+      for(var d=1;d<=nd;d++){var cur=new Date(y,m,d),dis=cur<today,iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),sel=iso===dataStr;h+='<button type="button" '+(dis?'disabled':'data-day="'+iso+'"')+' style="padding:9px 0;border:none;border-radius:8px;font-weight:700;cursor:'+(dis?'default':'pointer')+';'+(dis?'color:#ccc;background:#f7f7f7;':(sel?'background:#c0392b;color:#fff;':'background:#fbeaea;color:#c0392b;'))+'">'+d+'</button>';}
+      h+='</div><button type="button" data-cal-close="1" style="margin-top:10px;width:100%;padding:8px;border:1px solid #ccc;background:#fff;border-radius:8px;color:#666;cursor:pointer;">Fechar calendário</button></div>';
+    }
+    h+='</div>';
+    if(periodo||dataStr)h+='<button type="button" data-clear="1" style="width:100%;padding:8px;background:none;border:none;color:#999;text-decoration:underline;cursor:pointer;font-size:13px;margin-bottom:6px;">Limpar período e data</button>';
+    box.innerHTML=h;
+    box.querySelectorAll('[data-per]').forEach(function(b){b.onclick=function(){periodo=periodo===b.dataset.per?'':b.dataset.per;render();};});
+    var o=box.querySelector('[data-cal-open]');if(o)o.onclick=function(){calOpen=true;if(dataStr){var p=dataStr.split('-');calView=new Date(+p[0],+p[1]-1,1);}render();};
+    box.querySelectorAll('[data-nav]').forEach(function(b){b.onclick=function(){calView=new Date(calView.getFullYear(),calView.getMonth()+(+b.dataset.nav),1);render();};});
+    box.querySelectorAll('[data-day]').forEach(function(b){b.onclick=function(){dataStr=b.dataset.day;calOpen=false;render();};});
+    var c=box.querySelector('[data-cal-close]');if(c)c.onclick=function(){calOpen=false;render();};
+    var cl=box.querySelector('[data-clear]');if(cl)cl.onclick=function(){periodo='';dataStr='';calOpen=false;render();};
   }
 
-  function acharBotao(){
-    var els=document.querySelectorAll('button,a');
-    for(var i=0;i<els.length;i++){
-      var t=(els[i].textContent||'').toLowerCase();
-      if((t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)&&els[i].offsetParent!==null)return els[i];
-    }
-    return null;
-  }
+  function acharBotao(){var e=document.querySelectorAll('button,a');for(var i=0;i<e.length;i++){var t=(e[i].textContent||'').toLowerCase();if((t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)&&e[i].offsetParent!==null)return e[i];}return null;}
   setInterval(function(){
-    var btn=acharBotao(),box=document.getElementById('cdc-entrega-box');
-    if(btn){ if(!box)box=criarBloco(); if(box.previousSibling!==btn&&btn.parentNode)btn.parentNode.insertBefore(box,btn);}
-    else if(box&&box.parentNode){box.parentNode.removeChild(box);periodo='';dataStr='';}
+    var btn=acharBotao();
+    if(btn){if(!box){box=document.createElement('div');box.id='cdc-entrega-box';render();}if(btn.previousSibling!==box&&btn.parentNode)btn.parentNode.insertBefore(box,btn);}
+    else if(box&&box.parentNode){box.parentNode.removeChild(box);box=null;periodo='';dataStr='';calOpen=false;}
   },400);
 
+  // bloqueia envio sem período/data
   document.addEventListener('click',function(e){
-    var el=e.target;
-    while(el&&el!==document){
-      var t=(el.textContent||'').toLowerCase();
-      if((el.tagName==='BUTTON'||el.tagName==='A')&&(t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)){
-        if(!periodo||!dataStr){e.preventDefault();e.stopPropagation();alert('Escolha o período (Manhã/Tarde) e a data de entrega antes de enviar.');return;}
-      }
-      el=el.parentNode;
+    var el=e.target;while(el&&el!==document){var t=(el.textContent||'').toLowerCase();if((el.tagName==='BUTTON'||el.tagName==='A')&&(t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)){if(!periodo||!dataStr){e.preventDefault();e.stopPropagation();alert('Escolha o período (Manhã/Tarde) e a data de entrega antes de enviar.');return;}}el=el.parentNode;}
+  },true);
+
+  // CEP opcional: tira required e preenche vazio ao avançar
+  setInterval(function(){document.querySelectorAll('input').forEach(function(i){if((((i.id||'')+(i.name||'')+(i.placeholder||'')).toLowerCase()).indexOf('cep')>-1)i.removeAttribute('required');});},600);
+  document.addEventListener('click',function(e){
+    var el=e.target.closest?e.target.closest('button,a'):null;if(!el)return;var t=(el.textContent||'').toLowerCase();
+    if(t.indexOf('próximo')>-1||t.indexOf('proximo')>-1||t.indexOf('avançar')>-1||t.indexOf('avancar')>-1||t.indexOf('continuar')>-1){
+      document.querySelectorAll('input').forEach(function(i){if((((i.id||'')+(i.name||'')+(i.placeholder||'')).toLowerCase()).indexOf('cep')>-1&&!i.value.trim()){i.value='00000-000';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));}});
     }
   },true);
 
-  function add(url){
-    if(!url||(!periodo&&!dataStr))return url;
-    if(url.indexOf('wa.me')===-1&&url.indexOf('whatsapp')===-1)return url;
-    if(url.indexOf('Per%C3%ADodo%20de%20entrega')>-1)return url;
-    var extra='\n\n*Período de entrega:* '+periodo+'\n*Data de entrega:* '+fmtBR(dataStr);
-    if(url.indexOf('text=')>-1)return url.replace(/text=([^&]*)/,function(m,g){return 'text='+g+encodeURIComponent(extra);});
-    return url+(url.indexOf('?')>-1?'&':'?')+'text='+encodeURIComponent(extra.trim());
+  // injeta no WhatsApp e remove o CEP-fantasma
+  function inj(url){
+    if(!url||(url.indexOf('wa.me')===-1&&url.toLowerCase().indexOf('whatsapp')===-1))return url;
+    var m=url.match(/text=([^&]*)/),txt=m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';
+    txt=txt.split('\n').filter(function(l){return l.indexOf('00000-000')===-1;}).join('\n');
+    if(txt.indexOf('Período de entrega')===-1&&(periodo||dataStr))txt+='\n\n*Período de entrega:* '+periodo+'\n*Data de entrega:* '+fmtBR(dataStr);
+    var enc=encodeURIComponent(txt);
+    return m?url.replace(/text=([^&]*)/,'text='+enc):url+(url.indexOf('?')>-1?'&':'?')+'text='+enc;
   }
-  var _open=window.open;
-  window.open=function(u){try{u=add(u);}catch(e){}return _open.apply(window,[u].concat([].slice.call(arguments,1)));};
-  document.addEventListener('click',function(e){
-    var a=e.target.closest?e.target.closest('a[href*="wa.me"],a[href*="whatsapp"]'):null;
-    if(a){try{a.setAttribute('href',add(a.getAttribute('href')));}catch(err){}}
-  },true);
+  var _o=window.open;window.open=function(u){try{u=inj(u);}catch(e){}return _o.apply(window,[u].concat([].slice.call(arguments,1)));};
+  document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a[href*="wa.me"],a[href*="whatsapp"]'):null;if(a){try{a.setAttribute('href',inj(a.getAttribute('href')));}catch(err){}}},true);
 })();
 </script>
-</body>
-</html>
