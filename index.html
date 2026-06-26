@@ -259,6 +259,7 @@ const ITEMS = [
   {id:18, cat:'massas',    name:'Panqueca de frango, molho branco e mussarela',                   price:17.99, info:'300g · 558Kcal'},
   {id:19, cat:'massas',    name:'Panqueca de queijo com molho de tomate natural',                 price:17.99, info:'300g · 406Kcal'},
   {id:20, cat:'massas',    name:'Nhoque de batata 80% à bolonhesa e queijo',                      price:17.90, info:'300g · 291Kcal'},
+  {id:21, cat:'massas',    name:'Fusili ao molho pesto, sour cream e tomate',                     price:17.99, info:'300g · 600Kcal'},
   {id:23, cat:'massas',    name:'Ravioli de carne ao molho de tomate e parmesão',                 price:17.99, info:'402Kcal'},
   {id:24, cat:'massas',    name:'Torta de Frango com palmito',                                   price:17.99, info:'300g'},
   {id:28, cat:'novidades', name:'Salmão, macarrão penne, brócolis e tomate',                      price:22.90, info:'280g · 409Kcal', isNew:true},
@@ -304,6 +305,7 @@ ITEMS.forEach(i => itemMap[i.id] = i);
 let state = {
   step:0, mode:null, kit:null, cart:{}, cat:'carnes',
   payment:null, delivery:null,
+  periodo:null, dataEntrega:'',
   nome:'', telefone:'',
   rua:'', numero:'', complemento:'', bairro:'', cep:'', cidade:'',
   obs:''
@@ -353,6 +355,18 @@ function fullAddress() {
   return a;
 }
 
+// Data de hoje em YYYY-MM-DD (horário local) — usado no min do input de data
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+// Converte YYYY-MM-DD -> DD/MM/AAAA para exibição e WhatsApp
+function fmtBR(iso) {
+  if (!iso) return '';
+  const p = iso.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
 // Batched render — captures all rapid taps before rebuilding DOM
 let _renderPending = false;
 function scheduleRender() {
@@ -389,7 +403,8 @@ const canNext = () => {
   if (state.step === 2) {
     if (!state.nome || !state.telefone) return false;
     if (!state.payment || !state.delivery) return false;
-    if (state.delivery === 'delivery' && (!state.rua || !state.numero || !state.bairro || !state.cep || !state.cidade)) return false;
+    if (!state.periodo || !state.dataEntrega) return false;
+    if (state.delivery === 'delivery' && (!state.rua || !state.numero || !state.bairro || !state.cidade)) return false;
     return true;
   }
   return true;
@@ -572,7 +587,7 @@ function renderStep2() {
     </div>
     <div class="addr-grid2">
       <div class="field">
-        <label>CEP *</label>
+        <label>CEP</label>
         <input type="text" placeholder="00000-000" maxlength="9" value="${state.cep.replace(/"/g,'&quot;')}" oninput="state.cep=this.value;renderBottom()">
       </div>
       <div class="field">
@@ -615,6 +630,23 @@ function renderStep2() {
       <div class="dv-icon">🏪</div><div class="dv-label">Retirada</div>
       <div style="font-size:10px;color:#888;margin-top:2px;">Retire no local</div>
     </div>
+  </div>
+
+  <p class="section-title" style="margin-top:8px;">Período de entrega</p>
+  <p class="section-sub">Escolha o turno</p>
+  <div class="dlv-grid">
+    <div class="dlv-btn${state.periodo==='Manhã'?' selected':''}" onclick="state.periodo='Manhã';render()">
+      <div class="dv-icon">🌅</div><div class="dv-label">Manhã</div>
+    </div>
+    <div class="dlv-btn${state.periodo==='Tarde'?' selected':''}" onclick="state.periodo='Tarde';render()">
+      <div class="dv-icon">🌇</div><div class="dv-label">Tarde</div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:8px;">Data de entrega</p>
+  <p class="section-sub">Toque para abrir o calendário</p>
+  <div class="field">
+    <input type="date" min="${todayISO()}" value="${state.dataEntrega}" onchange="state.dataEntrega=this.value;renderBottom()" style="width:100%;padding:13px 14px;border:1.5px solid #e0e0e0;border-radius:12px;font-size:15px;color:#1a1a1a;background:#fff;font-family:inherit;">
   </div>${addrFields}`;
 }
 
@@ -629,7 +661,8 @@ function renderStep3() {
     <b style="color:#1a1a1a;">Resumo:</b><br>
     📦 ${state.mode==='kit' ? 'Kit — '+state.kit.name : 'Avulso — '+totalQty()+' itens'}<br>
     💳 ${PGTOS.find(p=>p.id===state.payment)?.label}${state.payment==='pix'?' <span style="color:#2E7D32;">✓ 3% off</span>':''}<br>
-    🚗 ${state.delivery==='delivery' ? 'Delivery — '+fullAddress() : 'Retirada no local'}
+    🚗 ${state.delivery==='delivery' ? 'Delivery — '+fullAddress() : 'Retirada no local'}<br>
+    🗓️ ${state.periodo||'—'} · 📅 ${fmtBR(state.dataEntrega)}
     ${state.delivery==='delivery' ? '<div style="margin-top:8px;background:#FFF3CD;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;color:#856404;">🚚 Frete será calculado e confirmado com você antes de fechar o pedido</div>' : ''}
   </div>`;
 }
@@ -686,6 +719,7 @@ function renderStep4() {
     <div><b style="color:#1a1a1a;">👤 Cliente:</b> ${state.nome} — ${state.telefone}</div>
     <div><b style="color:#1a1a1a;">💳 Pagamento:</b> ${pgLabel}${state.payment==='pix'?' — Chave CNPJ: 17.639.559/0001-69':''}</div>
     <div><b style="color:#1a1a1a;">🚗 Entrega:</b> ${state.delivery==='delivery'?'Delivery — '+fullAddress():'Retirada no local'}</div>
+    <div><b style="color:#1a1a1a;">🗓️ Período:</b> ${state.periodo||'—'} · <b style="color:#1a1a1a;">📅 Data:</b> ${fmtBR(state.dataEntrega)}</div>
     ${state.obs?`<div><b style="color:#1a1a1a;">📝 Obs:</b> ${state.obs}</div>`:''}
   </div>`;
 }
@@ -699,6 +733,8 @@ function generateMsg() {
     m += `📱 *Telefone:* ${state.telefone}\n`;
     m += `📦 *Tipo:* ${state.mode==='kit'?'Kit':'Avulso'}\n`;
     m += `🚗 *Entrega:* ${state.delivery==='delivery'?'Delivery':'Retirada'}\n`;
+    m += `🗓️ *Período:* ${state.periodo || '—'}\n`;
+    m += `📅 *Data de entrega:* ${fmtBR(state.dataEntrega)}\n`;
     if (state.delivery === 'delivery') {
       m += `📍 *Endereço:*\n`;
       m += `   Rua: ${state.rua}, ${state.numero}`;
@@ -789,76 +825,4 @@ function render() {
 }
 
 render();
-</script>
- <!-- ===== ADD-ON CDC Fit v2: Período + Calendário + CEP opcional ===== -->
-<script>
-(function () {
-  var periodo='', dataStr='', calOpen=false, calView=new Date(), box=null;
-  var meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var dows=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
-  function fmtBR(iso){if(!iso)return '';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-
-  function render(){
-    if(!box)return;
-    var h='';
-    h+='<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Período de entrega</label><div style="display:flex;gap:8px;">';
-    ['Manhã','Tarde'].forEach(function(p){var on=periodo===p;h+='<button type="button" data-per="'+p+'" style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;font-weight:700;cursor:pointer;'+(on?'background:#c0392b;color:#fff;':'background:#fff;color:#c0392b;')+'">'+p+'</button>';});
-    h+='</div></div>';
-    h+='<div style="margin:14px 0;"><label style="display:block;font-weight:700;margin-bottom:6px;color:#7a1f1f;">Data de entrega</label>';
-    if(dataStr&&!calOpen){h+='<div style="display:flex;gap:8px;"><div style="flex:1;padding:12px;border:2px solid #c0392b;border-radius:10px;font-weight:700;color:#c0392b;">'+fmtBR(dataStr)+'</div><button type="button" data-cal-open="1" style="padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">Alterar</button></div>';}
-    else if(!calOpen){h+='<button type="button" data-cal-open="1" style="width:100%;padding:12px;border:2px solid #c0392b;border-radius:10px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;">📅 Escolher data</button>';}
-    if(calOpen){
-      var today=sod(new Date()),y=calView.getFullYear(),m=calView.getMonth(),sd=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
-      h+='<div style="border:2px solid #c0392b;border-radius:12px;padding:10px;background:#fff;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><button type="button" data-nav="-1" style="width:36px;height:36px;border:1px solid #c0392b;border-radius:8px;background:#fff;color:#c0392b;font-size:18px;font-weight:700;cursor:pointer;">‹</button><strong style="color:#7a1f1f;">'+meses[m]+' '+y+'</strong><button type="button" data-nav="1" style="width:36px;height:36px;border:1px solid #c0392b;border-radius:8px;background:#fff;color:#c0392b;font-size:18px;font-weight:700;cursor:pointer;">›</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:11px;color:#999;margin-bottom:4px;">';
-      dows.forEach(function(d){h+='<div>'+d+'</div>';});
-      h+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
-      for(var i=0;i<sd;i++)h+='<div></div>';
-      for(var d=1;d<=nd;d++){var cur=new Date(y,m,d),dis=cur<today,iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),sel=iso===dataStr;h+='<button type="button" '+(dis?'disabled':'data-day="'+iso+'"')+' style="padding:9px 0;border:none;border-radius:8px;font-weight:700;cursor:'+(dis?'default':'pointer')+';'+(dis?'color:#ccc;background:#f7f7f7;':(sel?'background:#c0392b;color:#fff;':'background:#fbeaea;color:#c0392b;'))+'">'+d+'</button>';}
-      h+='</div><button type="button" data-cal-close="1" style="margin-top:10px;width:100%;padding:8px;border:1px solid #ccc;background:#fff;border-radius:8px;color:#666;cursor:pointer;">Fechar calendário</button></div>';
-    }
-    h+='</div>';
-    if(periodo||dataStr)h+='<button type="button" data-clear="1" style="width:100%;padding:8px;background:none;border:none;color:#999;text-decoration:underline;cursor:pointer;font-size:13px;margin-bottom:6px;">Limpar período e data</button>';
-    box.innerHTML=h;
-    box.querySelectorAll('[data-per]').forEach(function(b){b.onclick=function(){periodo=periodo===b.dataset.per?'':b.dataset.per;render();};});
-    var o=box.querySelector('[data-cal-open]');if(o)o.onclick=function(){calOpen=true;if(dataStr){var p=dataStr.split('-');calView=new Date(+p[0],+p[1]-1,1);}render();};
-    box.querySelectorAll('[data-nav]').forEach(function(b){b.onclick=function(){calView=new Date(calView.getFullYear(),calView.getMonth()+(+b.dataset.nav),1);render();};});
-    box.querySelectorAll('[data-day]').forEach(function(b){b.onclick=function(){dataStr=b.dataset.day;calOpen=false;render();};});
-    var c=box.querySelector('[data-cal-close]');if(c)c.onclick=function(){calOpen=false;render();};
-    var cl=box.querySelector('[data-clear]');if(cl)cl.onclick=function(){periodo='';dataStr='';calOpen=false;render();};
-  }
-
-  function acharBotao(){var e=document.querySelectorAll('button,a');for(var i=0;i<e.length;i++){var t=(e[i].textContent||'').toLowerCase();if((t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)&&e[i].offsetParent!==null)return e[i];}return null;}
-  setInterval(function(){
-    var btn=acharBotao();
-    if(btn){if(!box){box=document.createElement('div');box.id='cdc-entrega-box';render();}if(btn.previousSibling!==box&&btn.parentNode)btn.parentNode.insertBefore(box,btn);}
-    else if(box&&box.parentNode){box.parentNode.removeChild(box);box=null;periodo='';dataStr='';calOpen=false;}
-  },400);
-
-  // bloqueia envio sem período/data
-  document.addEventListener('click',function(e){
-    var el=e.target;while(el&&el!==document){var t=(el.textContent||'').toLowerCase();if((el.tagName==='BUTTON'||el.tagName==='A')&&(t.indexOf('whatsapp')>-1||t.indexOf('enviar pedido')>-1||t.indexOf('finalizar pedido')>-1)){if(!periodo||!dataStr){e.preventDefault();e.stopPropagation();alert('Escolha o período (Manhã/Tarde) e a data de entrega antes de enviar.');return;}}el=el.parentNode;}
-  },true);
-
-  // CEP opcional: tira required e preenche vazio ao avançar
-  setInterval(function(){document.querySelectorAll('input').forEach(function(i){if((((i.id||'')+(i.name||'')+(i.placeholder||'')).toLowerCase()).indexOf('cep')>-1)i.removeAttribute('required');});},600);
-  document.addEventListener('click',function(e){
-    var el=e.target.closest?e.target.closest('button,a'):null;if(!el)return;var t=(el.textContent||'').toLowerCase();
-    if(t.indexOf('próximo')>-1||t.indexOf('proximo')>-1||t.indexOf('avançar')>-1||t.indexOf('avancar')>-1||t.indexOf('continuar')>-1){
-      document.querySelectorAll('input').forEach(function(i){if((((i.id||'')+(i.name||'')+(i.placeholder||'')).toLowerCase()).indexOf('cep')>-1&&!i.value.trim()){i.value='00000-000';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));}});
-    }
-  },true);
-
-  // injeta no WhatsApp e remove o CEP-fantasma
-  function inj(url){
-    if(!url||(url.indexOf('wa.me')===-1&&url.toLowerCase().indexOf('whatsapp')===-1))return url;
-    var m=url.match(/text=([^&]*)/),txt=m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';
-    txt=txt.split('\n').filter(function(l){return l.indexOf('00000-000')===-1;}).join('\n');
-    if(txt.indexOf('Período de entrega')===-1&&(periodo||dataStr))txt+='\n\n*Período de entrega:* '+periodo+'\n*Data de entrega:* '+fmtBR(dataStr);
-    var enc=encodeURIComponent(txt);
-    return m?url.replace(/text=([^&]*)/,'text='+enc):url+(url.indexOf('?')>-1?'&':'?')+'text='+enc;
-  }
-  var _o=window.open;window.open=function(u){try{u=inj(u);}catch(e){}return _o.apply(window,[u].concat([].slice.call(arguments,1)));};
-  document.addEventListener('click',function(e){var a=e.target.closest?e.target.closest('a[href*="wa.me"],a[href*="whatsapp"]'):null;if(a){try{a.setAttribute('href',inj(a.getAttribute('href')));}catch(err){}}},true);
-})();
 </script>
