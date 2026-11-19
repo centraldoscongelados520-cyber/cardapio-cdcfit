@@ -119,6 +119,8 @@
   .kit-card { border: 2px solid #E0E0E0; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all .2s; }
   .kit-card:active { transform: scale(.98); }
   .kit-card.selected { border-color: #C62828; background: #FFF5F5; }
+  .kit-img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; margin-bottom: 10px; background: #FBF3EC; }
+  .kit-img.contain { object-fit: contain; }
   .kit-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
   .kit-badge { font-size: 9px; font-weight: 900; background: #C62828; color: white; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .06em; }
   .kit-badge.gold { background: #F9A825; color: #5D3B00; }
@@ -234,10 +236,10 @@ const ITEM_PHOTOS = {
 };
 
 const ITEMS = [
-  {id:1,  cat:'carnes',    name:'Carne moída patinho, arroz, feijão e purê de abóbora',          price:16.99, info:'300g · 261Kcal'},
+  {id:1,  cat:'carnes',    name:'Carne moída patinho, arroz, feijão e purê de abóbora',          price:16.90, info:'300g · 261Kcal'},
   {id:2,  cat:'carnes',    name:'Feijoada magra, arroz, farofa e couve refogada',                 price:16.99, info:'300g · 310Kcal'},
   {id:3,  cat:'carnes',    name:'Hambúrguer patinho grelhado, purê de batata e mussarela',        price:16.99, info:'300g · 309Kcal'},
-  {id:4,  cat:'carnes',    name:'Kibe assado com legumes',                                        price:16.99, info:'300g · 287Kcal'},
+  {id:4,  cat:'carnes',    name:'Kibe assado com legumes',                                        price:16.90, info:'300g · 287Kcal'},
   {id:5,  cat:'carnes',    name:'Escondidinho de carne moída de patinho e purê de batata',        price:16.99, info:'300g · 270Kcal'},
   {id:6,  cat:'carnes',    name:'Estrogonofe de carne, arroz e batata rústica',                   price:17.49, info:'300g · 354Kcal'},
   {id:7,  cat:'carnes',    name:'Picadinho de carne, arroz, feijão, batata e cenoura',            price:17.49, info:'300g · 255Kcal'},
@@ -252,7 +254,7 @@ const ITEMS = [
   {id:13, cat:'frangos',   name:'Sobrecoxa assada, arroz, feijão e batata rústica',               price:16.99, info:'300g · 354Kcal'},
   {id:14, cat:'frangos',   name:'Estrogonofe de frango, arroz e batata rústica',                  price:16.99, info:'300g · 354Kcal'},
   {id:15, cat:'frangos',   name:'Filé de frango à parmegiana e arroz',                            price:17.49, info:'300g · 375Kcal'},
-  {id:40, cat:'frangos',   name:'Frango desfiado com brócolis refogado',                          price:16.99, info:'300g · 215Kcal', fit:true},
+  {id:40, cat:'frangos',   name:'Frango desfiado com brócolis refogado',                          price:16.90, info:'250g · 215Kcal', fit:true},
   {id:50, cat:'frangos',   name:'Yakissoba de Frango — Molho da Chefe',                           price:19.99, info:'300g · 420Kcal'},
   {id:16, cat:'massas',    name:'Lasanha tradicional molho pomodoro',                             price:18.99, info:'300g · 498Kcal'},
   {id:17, cat:'massas',    name:'Panqueca de carne, molho de tomate e mussarela',                 price:17.99, info:'300g · 366Kcal'},
@@ -265,12 +267,13 @@ const ITEMS = [
 ];
 
 const KITS = [
-  {id:'k10a', badge:'Kit 10', name:'Conheça Nossos Sabores', qty:10, price:169.90, note:'1 de cada sabor',        items:[1,2,5,7,8,9,12,13,14,20]},
-  {id:'k14',  badge:'Kit 14', name:'Kit Sabores',            qty:14, price:229.90, note:'2 de cada sabor',        items:[1,2,7,8,9,13,14]},
-  {id:'k10b', badge:'Kit 10', name:'Vida Leve Saborosa',     qty:10, price:169.00, note:'2 de cada (5 sabores)',  items:[1,7,9,10,14], badgeCls:'green'},
-  {id:'k20',  badge:'Kit 20', name:'Dupla de Sabores',       qty:20, price:319.90, note:'2 de cada (10 sabores)', items:[1,2,3,5,7,8,9,11,13,14]},
-  {id:'k30',  badge:'Kit 30', name:'Família',                qty:30, price:459.90, note:'2 de cada (15 sabores)', items:[1,2,3,5,6,7,8,9,11,12,13,14,15,26,10]},
-  {id:'k40',  badge:'Kit 40', name:'Pacotão Família',        qty:40, price:599.90, note:'4 de cada (10 sabores)', items:[1,2,3,5,7,8,9,12,13,14], badgeCls:'gold'},
+  {id:'k10a', badge:'Kit 10', name:'Conheça Nossos Sabores', qty:10, price:169.90, note:'1 de cada (10 sabores)', items:[1,2,5,7,8,9,12,13,14,20], img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/1._kit10.png?width=600'},
+  {id:'k14b', badge:'Kit 14', name:'Baixa Caloria',          qty:14, price:229.90, note:'2 de cada (7 sabores)',  items:[1,3,7,9,10,11,14], badgeCls:'green', img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/2.baixa_caloria.png?width=600'},
+  {id:'k14',  badge:'Kit 14', name:'Dia a Dia',              qty:14, price:229.90, note:'2 de cada (7 sabores)',  items:[1,2,7,8,9,13,14], img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/3._kit14_dia_a_dia.png?width=600'},
+  {id:'k20',  badge:'Kit 20', name:'Dia a Dia',              qty:20, price:319.90, note:'2 de cada (10 sabores)', items:[1,2,3,5,7,8,9,11,13,14], img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/4.kit_20.png?width=600'},
+  {id:'k30',  badge:'Kit 30', name:'Dia a Dia',              qty:30, price:459.90, note:'2 de cada (15 sabores)', items:[1,2,3,5,6,7,8,9,11,12,13,14,15,26,10], img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/Capa_do_Kit_30_Dia_a_Dia.png?width=600'},
+  {id:'k40',  badge:'Kit 40', name:'Dia a Dia',              qty:40, price:599.90, note:'4 de cada (10 sabores)', items:[1,2,3,5,7,8,9,12,13,14], badgeCls:'gold', img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/Kit_40_Dia_a_Dia_1.png?width=600'},
+  {id:'k10b', badge:'Kit 10', name:'Vida Leve e Saborosa',   qty:10, price:169.90, note:'2 de cada (5 sabores)',  items:[1,7,9,10,14], badgeCls:'green', img:'https://cdn.shopify.com/s/files/1/0613/1829/9779/files/Kit_Vida_Leve_com_5_sabores.png?width=600', imgFit:'contain'},
 ];
 
 const CATS = [
@@ -284,11 +287,10 @@ const PGTOS = [
   {id:'pix',    label:'PIX',    sub:'3% off'},
   {id:'debito', label:'Débito', sub:''},
   {id:'credito',label:'Crédito',sub:''},
-  {id:'alelo',  label:'Alelo',  sub:'a consultar'},
-  {id:'vr',     label:'VR',     sub:'a consultar'},
-  {id:'ticket', label:'Ticket', sub:'a consultar'},
-  {id:'sodexo', label:'Sodexo', sub:'a consultar'},
-  {id:'pluxee', label:'Pluxee', sub:'a consultar'},
+  {id:'alelo',  label:'Alelo',  sub:'aceito'},
+  {id:'vr',     label:'VR',     sub:'aceito'},
+  {id:'ticket', label:'Ticket', sub:'aceito'},
+  {id:'pluxee', label:'Pluxee', sub:'aceito (ex-Sodexo)'},
 ];
 
 const itemMap = {};
@@ -391,7 +393,7 @@ function goStep(s) {
 
 const canNext = () => {
   if (state.step === 0) return !!state.mode;
-  if (state.step === 1) return state.mode === 'kit' ? !!state.kit : totalQty() > 0;
+  if (state.step === 1) return state.mode === 'kit' ? !!state.kit : totalQty() >= 10;
   if (state.step === 2) {
     if (!state.nome || !state.telefone) return false;
     if (!state.payment || !state.delivery) return false;
@@ -419,7 +421,7 @@ function renderStep0() {
       <div class="mc-icon">📦</div><div class="mc-title">Escolher um Kit</div><div class="mc-sub">Combos prontos com desconto</div>
     </div>
     <div class="mode-card${state.mode==='avulso'?' selected':''}" onclick="state.mode='avulso';render()">
-      <div class="mc-icon">✏️</div><div class="mc-title">Montar meu Pedido</div><div class="mc-sub">Escolha item por item</div>
+      <div class="mc-icon">✏️</div><div class="mc-title">Montar meu Pedido</div><div class="mc-sub">Escolha item por item (mín. 10)</div>
     </div>
   </div>
   <div style="background:#f9f9f9;border-radius:12px;padding:12px 14px;">
@@ -475,6 +477,7 @@ function itemRow(it) {
 function renderStep1Kit() {
   const kitCards = KITS.map(k => `
   <div class="kit-card${state.kit&&state.kit.id===k.id?' selected':''}" onclick="state.kit=KITS.find(x=>x.id==='${k.id}');render()">
+    ${k.img?`<img class="kit-img${k.imgFit==='contain'?' contain':''}" src="${k.img}" alt="${k.badge} ${k.name}" loading="lazy">`:''}
     <div class="kit-header">
       <div>
         <span class="kit-badge${k.badgeCls?' '+k.badgeCls:''}">${k.badge}</span>
@@ -520,7 +523,8 @@ function renderStep1Kit() {
 function renderStep1Avulso() {
   const q = totalQty(), vd = volDisc();
   let discBar = '';
-  if (q === 0) discBar = `<div class="vol-info">💡 Adicione 14+ itens para ganhar desconto de volume</div>`;
+  if (q === 0) discBar = `<div class="vol-info">📦 Pedido mínimo de 10 marmitas · com 14+ você ganha desconto</div>`;
+  else if (q < 10) discBar = `<div class="vol-info">📦 Pedido mínimo de 10 marmitas — falta${10-q>1?'m':''} ${10-q}</div>`;
   else if (vd > 0) {
     let prox = '';
     if(q<20) prox=' — mais '+(20-q)+' para 4%';
@@ -729,7 +733,7 @@ function generateMsg() {
       m += `   CEP: ${state.cep}\n`;
       m += `   Cidade: ${state.cidade}\n`;
     }
-    m += `💳 *Pagamento:* ${pgLabel}${state.payment==='pix'?' (3% off)':''}${['alelo','vr','ticket','sodexo','pluxee'].includes(state.payment)?' (voucher — a consultar)':''}\n\n*Itens:*\n`;
+    m += `💳 *Pagamento:* ${pgLabel}${state.payment==='pix'?' (3% off)':''}${['alelo','vr','ticket','pluxee'].includes(state.payment)?' (voucher)':''}\n\n*Itens:*\n`;
     if (state.mode==='kit' && state.kit) {
       m += `✅ ${state.kit.name} — ${state.kit.qty} refeições — ${fmt(state.kit.price)}\n`;
       if (Object.keys(state.cart).length > 0) {
